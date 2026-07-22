@@ -72,7 +72,7 @@ final class CameraPreviewContainerView: NSView {
             (
                 $0.name,
                 previewLayer.layerPointConverted(
-                    fromCaptureDevicePoint: CGPoint(x: $0.point.x, y: 1 - $0.point.y)
+                    fromCaptureDevicePoint: $0.point
                 )
             )
         })
