@@ -1,0 +1,346 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A10000000000000000000001 /* VisionSnapApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000001 /* VisionSnapApp.swift */; };
+		A10000000000000000000002 /* CameraService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000002 /* CameraService.swift */; };
+		A10000000000000000000003 /* MenuBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000003 /* MenuBarController.swift */; };
+		A10000000000000000000004 /* PermissionsOnboarding.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000004 /* PermissionsOnboarding.swift */; };
+		A10000000000000000000005 /* ConflictDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000005 /* ConflictDetector.swift */; };
+		A10000000000000000000006 /* ConflictWarningPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000006 /* ConflictWarningPresenter.swift */; };
+		A10000000000000000000007 /* PermissionsWindowPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000009 /* PermissionsWindowPresenter.swift */; };
+		A10000000000000000000008 /* CameraPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000A /* CameraPreview.swift */; };
+		A10000000000000000000009 /* CameraMonitorPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000B /* CameraMonitorPresenter.swift */; };
+		A1000000000000000000000A /* HandTrackingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000C /* HandTrackingService.swift */; };
+		A1000000000000000000000B /* PinchDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000D /* PinchDetector.swift */; };
+		A1000000000000000000000C /* WorkspaceGestureDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000E /* WorkspaceGestureDetector.swift */; };
+		A1000000000000000000000D /* WindowControlService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000F /* WindowControlService.swift */; };
+		A1000000000000000000000E /* GestureEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000010 /* GestureEngine.swift */; };
+		A1000000000000000000000F /* GestureOverlayPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000011 /* GestureOverlayPresenter.swift */; };
+		A10000000000000000000010 /* HandPoseAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000012 /* HandPoseAnalyzer.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		B10000000000000000000001 /* VisionSnapApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionSnapApp.swift; sourceTree = "<group>"; };
+		B10000000000000000000002 /* CameraService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraService.swift; sourceTree = "<group>"; };
+		B10000000000000000000003 /* MenuBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarController.swift; sourceTree = "<group>"; };
+		B10000000000000000000004 /* PermissionsOnboarding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsOnboarding.swift; sourceTree = "<group>"; };
+		B10000000000000000000005 /* ConflictDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConflictDetector.swift; sourceTree = "<group>"; };
+		B10000000000000000000006 /* ConflictWarningPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConflictWarningPresenter.swift; sourceTree = "<group>"; };
+		B10000000000000000000007 /* VisionSnap.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VisionSnap.entitlements; sourceTree = "<group>"; };
+		B10000000000000000000008 /* VisionSnap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VisionSnap.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B10000000000000000000009 /* PermissionsWindowPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsWindowPresenter.swift; sourceTree = "<group>"; };
+		B1000000000000000000000A /* CameraPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreview.swift; sourceTree = "<group>"; };
+		B1000000000000000000000B /* CameraMonitorPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraMonitorPresenter.swift; sourceTree = "<group>"; };
+		B1000000000000000000000C /* HandTrackingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandTrackingService.swift; sourceTree = "<group>"; };
+		B1000000000000000000000D /* PinchDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinchDetector.swift; sourceTree = "<group>"; };
+		B1000000000000000000000E /* WorkspaceGestureDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceGestureDetector.swift; sourceTree = "<group>"; };
+		B1000000000000000000000F /* WindowControlService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowControlService.swift; sourceTree = "<group>"; };
+		B10000000000000000000010 /* GestureEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestureEngine.swift; sourceTree = "<group>"; };
+		B10000000000000000000011 /* GestureOverlayPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestureOverlayPresenter.swift; sourceTree = "<group>"; };
+		B10000000000000000000012 /* HandPoseAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandPoseAnalyzer.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C10000000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D10000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				D10000000000000000000002 /* VisionSnap */,
+				D10000000000000000000007 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D10000000000000000000002 /* VisionSnap */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000001 /* VisionSnapApp.swift */,
+				D10000000000000000000003 /* Services */,
+				D10000000000000000000004 /* Features */,
+				B10000000000000000000007 /* VisionSnap.entitlements */,
+			);
+			path = VisionSnap;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000003 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000002 /* CameraService.swift */,
+				B1000000000000000000000C /* HandTrackingService.swift */,
+				B1000000000000000000000D /* PinchDetector.swift */,
+				B1000000000000000000000E /* WorkspaceGestureDetector.swift */,
+				B1000000000000000000000F /* WindowControlService.swift */,
+				B10000000000000000000010 /* GestureEngine.swift */,
+				B10000000000000000000012 /* HandPoseAnalyzer.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000004 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				D1000000000000000000000A /* Overlay */,
+				D10000000000000000000009 /* CameraMonitor */,
+				D10000000000000000000005 /* Permissions */,
+				D10000000000000000000006 /* MenuBar */,
+				D10000000000000000000008 /* Conflicts */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000005 /* Permissions */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000004 /* PermissionsOnboarding.swift */,
+				B10000000000000000000009 /* PermissionsWindowPresenter.swift */,
+			);
+			path = Permissions;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000006 /* MenuBar */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000003 /* MenuBarController.swift */,
+			);
+			path = MenuBar;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000007 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000008 /* VisionSnap.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000008 /* Conflicts */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000005 /* ConflictDetector.swift */,
+				B10000000000000000000006 /* ConflictWarningPresenter.swift */,
+			);
+			path = Conflicts;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000009 /* CameraMonitor */ = {
+			isa = PBXGroup;
+			children = (
+				B1000000000000000000000A /* CameraPreview.swift */,
+				B1000000000000000000000B /* CameraMonitorPresenter.swift */,
+			);
+			path = CameraMonitor;
+			sourceTree = "<group>";
+		};
+		D1000000000000000000000A /* Overlay */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000011 /* GestureOverlayPresenter.swift */,
+			);
+			path = Overlay;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E10000000000000000000001 /* VisionSnap */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F10000000000000000000002 /* Build configuration list for PBXNativeTarget "VisionSnap" */;
+			buildPhases = (
+				C10000000000000000000002 /* Sources */,
+				C10000000000000000000001 /* Frameworks */,
+				C10000000000000000000003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = VisionSnap;
+			productName = VisionSnap;
+			productReference = B10000000000000000000008 /* VisionSnap.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E10000000000000000000002 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					E10000000000000000000001 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+				};
+			};
+			buildConfigurationList = F10000000000000000000001 /* Build configuration list for PBXProject "VisionSnap" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = D10000000000000000000001;
+			productRefGroup = D10000000000000000000007 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E10000000000000000000001 /* VisionSnap */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C10000000000000000000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C10000000000000000000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000001 /* VisionSnapApp.swift in Sources */,
+				A10000000000000000000002 /* CameraService.swift in Sources */,
+				A10000000000000000000003 /* MenuBarController.swift in Sources */,
+				A10000000000000000000004 /* PermissionsOnboarding.swift in Sources */,
+				A10000000000000000000005 /* ConflictDetector.swift in Sources */,
+				A10000000000000000000006 /* ConflictWarningPresenter.swift in Sources */,
+				A10000000000000000000007 /* PermissionsWindowPresenter.swift in Sources */,
+				A10000000000000000000008 /* CameraPreview.swift in Sources */,
+				A10000000000000000000009 /* CameraMonitorPresenter.swift in Sources */,
+				A1000000000000000000000A /* HandTrackingService.swift in Sources */,
+				A1000000000000000000000B /* PinchDetector.swift in Sources */,
+				A1000000000000000000000C /* WorkspaceGestureDetector.swift in Sources */,
+				A1000000000000000000000D /* WindowControlService.swift in Sources */,
+				A1000000000000000000000E /* GestureEngine.swift in Sources */,
+				A1000000000000000000000F /* GestureOverlayPresenter.swift in Sources */,
+				A10000000000000000000010 /* HandPoseAnalyzer.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		F10000000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		F10000000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+		};
+			name = Release;
+		};
+		F10000000000000000000005 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = VisionSnap/VisionSnap.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "VisionSnap uses the camera only to detect hand gestures. Frames are never recorded, stored, or transmitted.";
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nutttt.VisionSnap;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		F10000000000000000000006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = VisionSnap/VisionSnap.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "VisionSnap uses the camera only to detect hand gestures. Frames are never recorded, stored, or transmitted.";
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nutttt.VisionSnap;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F10000000000000000000001 /* Build configuration list for PBXProject "VisionSnap" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F10000000000000000000003 /* Debug */,
+				F10000000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F10000000000000000000002 /* Build configuration list for PBXNativeTarget "VisionSnap" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F10000000000000000000005 /* Debug */,
+				F10000000000000000000006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E10000000000000000000002 /* Project object */;
+}

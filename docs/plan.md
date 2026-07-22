@@ -28,13 +28,14 @@ Success Criteria: เปิดแอปครั้งแรก → ขอ permi
 
 ## Phase 1 — MVP (1-2 สัปดาห์ ตามเดิม แต่ scope เปลี่ยน)
 
-- [ ] Camera capture (AVFoundation) — **เปิดเฉพาะตอน toggle ON เท่านั้น** (เดิมไม่ระบุจุดนี้)
-- [ ] Vision hand tracking
-- [ ] Virtual cursor (primary display only — ตัด "multi-monitor aware" ออกจาก Phase 1 เดิม ย้ายไป Non-Goals ถาวร)
-- [ ] Pinch detection **พร้อม confidence threshold (0.6) + hold-time debounce (150ms)** — เดิมไม่มีค่าตัวเลข ทำให้ implement มั่วได้
-- [ ] Highlight hovered window
-- [ ] Drag window
-- [ ] **Cancel gesture (กำหมัด) + Escape key cancel** — ย้ายมาจาก Phase 3/technical-suggest เข้า MVP เพราะเป็น safety net ที่ต้องมีตั้งแต่ demo แรก ไม่งั้น false positive จะทำลาย trust ทันที
+- [x] Camera capture (AVFoundation) — **เปิดเฉพาะตอน toggle ON เท่านั้น** (เดิมไม่ระบุจุดนี้)
+- [x] Vision hand tracking
+- [x] Virtual cursor (primary display only — ตัด "multi-monitor aware" ออกจาก Phase 1 เดิม ย้ายไป Non-Goals ถาวร)
+- [x] Pinch detection **พร้อม confidence threshold (0.6) + hold-time debounce (150ms)** — เดิมไม่มีค่าตัวเลข ทำให้ implement มั่วได้
+- [x] Highlight hovered window
+- [x] Drag window
+- [x] **Cancel gesture (กำหมัด) + Escape key cancel** — ย้ายมาจาก Phase 3/technical-suggest เข้า MVP เพราะเป็น safety net ที่ต้องมีตั้งแต่ demo แรก ไม่งั้น false positive จะทำลาย trust ทันที
+- [x] 4-finger horizontal Desktop switch + 5-finger upward Mission Control
 - [ ] Basic settings panel (รวม hotkey config + auto-timeout กล้อง)
 - [ ] Auto-off กล้องถ้าไม่มีมือใน frame >5 นาที (default, ปรับได้)
 
