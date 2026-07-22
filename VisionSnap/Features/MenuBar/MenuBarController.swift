@@ -9,17 +9,20 @@ final class MenuBarController: ObservableObject {
 
     let handTrackingService: HandTrackingService
     private let cameraService: CameraService
+    private let gestureEngine: GestureEngine
 
     init() {
         let handTrackingService = HandTrackingService()
         self.handTrackingService = handTrackingService
         cameraService = CameraService(frameDelegate: handTrackingService)
+        gestureEngine = GestureEngine(trackingService: handTrackingService)
     }
 
     var captureSession: AVCaptureSession { cameraService.captureSession }
 
     func toggleGestureMode() {
         if isGestureModeEnabled {
+            gestureEngine.stop()
             cameraService.stop()
             handTrackingService.reset()
             isGestureModeEnabled = false
@@ -28,6 +31,7 @@ final class MenuBarController: ObservableObject {
 
         do {
             try cameraService.start()
+            gestureEngine.start()
             isGestureModeEnabled = true
             errorMessage = nil
             showCameraMonitor()

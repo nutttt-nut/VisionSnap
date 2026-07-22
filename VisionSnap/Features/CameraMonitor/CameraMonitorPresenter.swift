@@ -108,12 +108,19 @@ private struct CameraMonitorView: View {
         case .lowConfidence:
             "Low confidence"
         case .open:
-            "Hand detected"
+            fingerCount.map { "Hand detected · \($0) fingers" } ?? "Hand detected"
         case let .candidate(progress):
             "Pinch candidate \(Int(progress * 100))%"
         case .pinching:
             "PINCHING"
         }
+    }
+
+    private var fingerCount: Int? {
+        let points = Dictionary(uniqueKeysWithValues: handTrackingService.snapshot.landmarks.map {
+            ($0.name, $0.point)
+        })
+        return HandPoseAnalyzer.analyze(points).extendedFingerCount
     }
 
     private var detectionColor: Color {

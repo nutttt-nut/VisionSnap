@@ -4,7 +4,7 @@ Gesture-based macOS window manager — control windows with hand gestures via th
 
 ## Status
 
-Phase 0 foundation is in progress: the macOS 13+ SwiftUI app scaffold, permission onboarding, menu bar camera toggle, and conflict detection are implemented.
+Phase 1 interaction is in progress: hand tracking, target-window feedback, pinch drag, and workspace gestures are implemented.
 
 ## Docs
 
@@ -18,6 +18,8 @@ Phase 0 foundation is in progress: the macOS 13+ SwiftUI app scaffold, permissio
 - Distribution: direct download + notarization, **not sandboxed** (Accessibility API requires it — see spec.md Distribution section for why)
 - Camera is off by default, toggled via menu bar / hotkey
 - Camera Monitor shows live hand landmarks and pinch diagnostics
+- A cyan cursor plus yellow border/name identifies the selected app window
+- Four-finger horizontal swipe changes Desktop; five-finger upward swipe opens Mission Control
 - MVP scope: one-hand pinch-drag-drop + cancel gesture + basic snap, single (primary) display only
 
 ## Privacy
@@ -29,6 +31,7 @@ The camera is off by default. When enabled, frames are processed in memory only 
 - Gesture-native control targets the primary display only.
 - Hand tracking needs adequate lighting and can fail when fingers occlude each other.
 - Clamshell mode is unsupported without another camera.
+- Desktop/Mission Control gestures use the macOS Control+Arrow shortcuts and require those shortcuts to remain enabled.
 
 ## Development
 

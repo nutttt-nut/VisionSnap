@@ -18,6 +18,11 @@
 		A10000000000000000000009 /* CameraMonitorPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000B /* CameraMonitorPresenter.swift */; };
 		A1000000000000000000000A /* HandTrackingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000C /* HandTrackingService.swift */; };
 		A1000000000000000000000B /* PinchDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000D /* PinchDetector.swift */; };
+		A1000000000000000000000C /* WorkspaceGestureDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000E /* WorkspaceGestureDetector.swift */; };
+		A1000000000000000000000D /* WindowControlService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000F /* WindowControlService.swift */; };
+		A1000000000000000000000E /* GestureEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000010 /* GestureEngine.swift */; };
+		A1000000000000000000000F /* GestureOverlayPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000011 /* GestureOverlayPresenter.swift */; };
+		A10000000000000000000010 /* HandPoseAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000012 /* HandPoseAnalyzer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +39,11 @@
 		B1000000000000000000000B /* CameraMonitorPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraMonitorPresenter.swift; sourceTree = "<group>"; };
 		B1000000000000000000000C /* HandTrackingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandTrackingService.swift; sourceTree = "<group>"; };
 		B1000000000000000000000D /* PinchDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinchDetector.swift; sourceTree = "<group>"; };
+		B1000000000000000000000E /* WorkspaceGestureDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceGestureDetector.swift; sourceTree = "<group>"; };
+		B1000000000000000000000F /* WindowControlService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowControlService.swift; sourceTree = "<group>"; };
+		B10000000000000000000010 /* GestureEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestureEngine.swift; sourceTree = "<group>"; };
+		B10000000000000000000011 /* GestureOverlayPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestureOverlayPresenter.swift; sourceTree = "<group>"; };
+		B10000000000000000000012 /* HandPoseAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandPoseAnalyzer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,6 +82,10 @@
 				B10000000000000000000002 /* CameraService.swift */,
 				B1000000000000000000000C /* HandTrackingService.swift */,
 				B1000000000000000000000D /* PinchDetector.swift */,
+				B1000000000000000000000E /* WorkspaceGestureDetector.swift */,
+				B1000000000000000000000F /* WindowControlService.swift */,
+				B10000000000000000000010 /* GestureEngine.swift */,
+				B10000000000000000000012 /* HandPoseAnalyzer.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -79,6 +93,7 @@
 		D10000000000000000000004 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				D1000000000000000000000A /* Overlay */,
 				D10000000000000000000009 /* CameraMonitor */,
 				D10000000000000000000005 /* Permissions */,
 				D10000000000000000000006 /* MenuBar */,
@@ -128,6 +143,14 @@
 				B1000000000000000000000B /* CameraMonitorPresenter.swift */,
 			);
 			path = CameraMonitor;
+			sourceTree = "<group>";
+		};
+		D1000000000000000000000A /* Overlay */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000011 /* GestureOverlayPresenter.swift */,
+			);
+			path = Overlay;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -209,6 +232,11 @@
 				A10000000000000000000009 /* CameraMonitorPresenter.swift in Sources */,
 				A1000000000000000000000A /* HandTrackingService.swift in Sources */,
 				A1000000000000000000000B /* PinchDetector.swift in Sources */,
+				A1000000000000000000000C /* WorkspaceGestureDetector.swift in Sources */,
+				A1000000000000000000000D /* WindowControlService.swift in Sources */,
+				A1000000000000000000000E /* GestureEngine.swift in Sources */,
+				A1000000000000000000000F /* GestureOverlayPresenter.swift in Sources */,
+				A10000000000000000000010 /* HandPoseAnalyzer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

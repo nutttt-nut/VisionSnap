@@ -65,6 +65,13 @@
 - **Confidence threshold**: ไม่ trigger pinch action ถ้า joint confidence < 0.6 (ค่าจาก Vision Framework) — กัน false positive ตอนแสงไม่ดี
 - **Minimum hold time**: pinch ต้องค้าง ≥150ms ก่อนนับเป็น "grab" จริง กัน jitter สั่นเป็น pinch หลอก
 
+## Workspace Gestures
+
+- **4 นิ้วปัดแนวนอน**: สลับ Desktop ตามทิศทางมือ โดย trigger shortcut `Control+Left/Right` หลังเคลื่อนเกิน threshold
+- **5 นิ้วปัดขึ้น**: เปิด Mission Control ผ่าน `Control+Up`
+- ทั้งสอง gesture trigger ครั้งเดียวต่อการยกมือหนึ่งครั้งและมี cooldown กันยิงซ้ำ
+- เป็น discrete system shortcut ไม่ใช่ continuous trackpad animation เพราะ macOS ไม่มี public API สำหรับสร้าง trackpad gesture ปลอม
+
 ## Architecture (อัปเดตจาก architecture.md เดิม)
 
 ```text
