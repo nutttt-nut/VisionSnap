@@ -13,6 +13,8 @@ final class GestureEngine {
     private var globalKeyMonitor: Any?
     private var localKeyMonitor: Any?
     private var selectedWindow: TargetWindow?
+    private var isMouseDown = false
+    private var lastCursorPoint: CGPoint?
     private var lastSelectionTime = -Double.infinity
     private var actionStatus: (text: String, expiresAt: TimeInterval)?
 
@@ -34,7 +36,7 @@ final class GestureEngine {
     func stop() {
         trackingSubscription = nil
         removeEscapeMonitors()
-        windowControlService.cancelDrag()
+        releaseMouseIfNeeded()
         workspaceGestureDetector.reset()
         selectedWindow = nil
         overlayPresenter.hide()
@@ -48,15 +50,12 @@ final class GestureEngine {
             fingerCount: pose.extendedFingerCount,
             isIndexPointing: pose.isIndexPointing,
             phase: snapshot.phase,
-            isDragging: windowControlService.isDragging,
+            isDragging: isMouseDown,
             isFist: pose.isFist
         )
 
         if pose.isFist {
-            if windowControlService.isDragging {
-                windowControlService.cancelDrag()
-                showActionStatus("ยกเลิก — คืนตำแหน่งเดิม", at: timestamp)
-            }
+            releaseMouseIfNeeded()
             selectedWindow = nil
             workspaceGestureDetector.reset()
             overlayPresenter.model.cursorPoint = nil
@@ -102,9 +101,7 @@ final class GestureEngine {
         overlayPresenter.model.gesturePoint = nil
 
         guard let cursor = cursorPoint(from: points) else {
-            if windowControlService.isDragging {
-                windowControlService.cancelDrag()
-            }
+            releaseMouseIfNeeded()
             selectedWindow = nil
             overlayPresenter.model.cursorPoint = nil
             overlayPresenter.model.gesturePoint = nil
@@ -115,11 +112,12 @@ final class GestureEngine {
         }
 
         CGWarpMouseCursorPosition(cursor)
+        lastCursorPoint = cursor
         overlayPresenter.model.cursorPoint = cursor
 
         handlePinch(snapshot.phase, cursor: cursor, timestamp: timestamp)
 
-        if !windowControlService.isDragging, timestamp - lastSelectionTime >= 0.05 {
+        if !isMouseDown, timestamp - lastSelectionTime >= 0.05 {
             selectedWindow = windowControlService.window(at: cursor)
             lastSelectionTime = timestamp
         }
@@ -139,21 +137,21 @@ final class GestureEngine {
     ) {
         switch phase {
         case .pinching:
-            if !windowControlService.isDragging, let selectedWindow,
-               windowControlService.beginDrag(target: selectedWindow, cursor: cursor) {
-                showActionStatus("จับ \(selectedWindow.appName)", at: timestamp)
+            if isMouseDown {
+                postMouseEvent(.leftMouseDragged, at: cursor)
+            } else {
+                postMouseEvent(.leftMouseDown, at: cursor)
+                isMouseDown = true
+                showActionStatus("คลิกค้าง", at: timestamp)
             }
-            windowControlService.updateDrag(cursor: cursor)
         case .open:
-            if windowControlService.isDragging {
-                windowControlService.endDrag()
-                showActionStatus("วางหน้าต่าง", at: timestamp)
+            if isMouseDown {
+                postMouseEvent(.leftMouseUp, at: cursor)
+                isMouseDown = false
+                showActionStatus("คลิก", at: timestamp)
             }
         case .noHand, .lowConfidence:
-            if windowControlService.isDragging {
-                windowControlService.cancelDrag()
-                showActionStatus("Tracking หลุด — คืนตำแหน่งเดิม", at: timestamp)
-            }
+            releaseMouseIfNeeded()
         case .candidate:
             break
         }
@@ -194,14 +192,14 @@ final class GestureEngine {
         }
         self.actionStatus = nil
 
-        if windowControlService.isDragging {
-            return "กำลังลาก — ปล่อยนิ้วเพื่อวาง"
+        if isMouseDown {
+            return "คลิกค้าง — ปล่อย pinch เพื่อปล่อยคลิก"
         }
         switch phase {
         case let .candidate(progress):
-            return "จับหน้าต่าง \(Int(progress * 100))%"
+            return "Pinch เพื่อคลิก \(Int(progress * 100))%"
         case .pinching:
-            return "กำลังจับ"
+            return "คลิกค้าง"
         default:
             break
         }
@@ -214,7 +212,7 @@ final class GestureEngine {
         if fingerCount == 3 {
             return "3 นิ้ว: ไม่มีคำสั่ง"
         }
-        return selectedWindow == nil ? "ชี้ไปที่หน้าต่าง" : "Pinch เพื่อจับ"
+        return "Pinch เพื่อคลิก"
     }
 
     private func showActionStatus(_ text: String, at timestamp: TimeInterval) {
@@ -258,8 +256,19 @@ final class GestureEngine {
     }
 
     private func cancelDragWithEscape() {
-        guard windowControlService.isDragging else { return }
-        windowControlService.cancelDrag()
-        showActionStatus("Escape — คืนตำแหน่งเดิม", at: ProcessInfo.processInfo.systemUptime)
+        guard isMouseDown else { return }
+        releaseMouseIfNeeded()
+        showActionStatus("Escape — ปล่อยคลิก", at: ProcessInfo.processInfo.systemUptime)
+    }
+
+    private func postMouseEvent(_ type: CGEventType, at point: CGPoint) {
+        CGEvent(mouseEventSource: nil, mouseType: type, mouseCursorPosition: point, mouseButton: .left)?
+            .post(tap: .cghidEventTap)
+    }
+
+    private func releaseMouseIfNeeded() {
+        guard isMouseDown else { return }
+        postMouseEvent(.leftMouseUp, at: lastCursorPoint ?? .zero)
+        isMouseDown = false
     }
 }
