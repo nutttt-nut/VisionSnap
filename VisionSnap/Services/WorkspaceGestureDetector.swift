@@ -13,6 +13,18 @@ enum HandInteractionMode: Equatable {
     case inactive
 }
 
+enum PointerMapper {
+    private static let activeMinimum: CGFloat = 0.2
+    private static let activeMaximum: CGFloat = 0.8
+
+    static func screenNormalized(fromCamera point: CGPoint) -> CGPoint {
+        let span = activeMaximum - activeMinimum
+        let cameraX = min(max((point.x - activeMinimum) / span, 0), 1)
+        let cameraY = min(max((point.y - activeMinimum) / span, 0), 1)
+        return CGPoint(x: 1 - cameraX, y: 1 - cameraY)
+    }
+}
+
 enum HandInteractionModeResolver {
     static func resolve(
         fingerCount: Int?,

@@ -65,6 +65,29 @@ struct WorkspaceGestureDetectorTests {
             "pinch candidate must override fist classification"
         )
 
+        expect(
+            pointsEqual(
+                PointerMapper.screenNormalized(fromCamera: CGPoint(x: 0.5, y: 0.5)),
+                CGPoint(x: 0.5, y: 0.5)
+            ),
+            "camera center must map to screen center"
+        )
+        expect(
+            PointerMapper.screenNormalized(fromCamera: CGPoint(x: 0.2, y: 0.2))
+                == CGPoint(x: 1, y: 1),
+            "active-region minimum must map to the opposite screen edge"
+        )
+        expect(
+            PointerMapper.screenNormalized(fromCamera: CGPoint(x: 0.8, y: 0.8))
+                == CGPoint(x: 0, y: 0),
+            "active-region maximum must map to the opposite screen edge"
+        )
+        expect(
+            PointerMapper.screenNormalized(fromCamera: CGPoint(x: 0, y: 1))
+                == CGPoint(x: 1, y: 0),
+            "points outside the active region must clamp to screen edges"
+        )
+
         var detector = WorkspaceGestureDetector()
 
         expect(detector.update(frame: frame(4, x: 0.4, y: 0.5), at: 0) == nil)
@@ -119,5 +142,9 @@ struct WorkspaceGestureDetectorTests {
         _ message: String = "unexpected result"
     ) {
         guard condition() else { fatalError(message) }
+    }
+
+    private static func pointsEqual(_ first: CGPoint, _ second: CGPoint) -> Bool {
+        abs(first.x - second.x) < 0.0001 && abs(first.y - second.y) < 0.0001
     }
 }

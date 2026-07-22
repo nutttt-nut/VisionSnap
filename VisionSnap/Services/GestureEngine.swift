@@ -166,9 +166,10 @@ final class GestureEngine {
         guard let palmCenter, let screen = NSScreen.screens.first else {
             return nil
         }
+        let normalized = PointerMapper.screenNormalized(fromCamera: palmCenter)
         let target = CGPoint(
-            x: (1 - palmCenter.x) * screen.frame.width,
-            y: (1 - palmCenter.y) * screen.frame.height
+            x: normalized.x * screen.frame.width,
+            y: normalized.y * screen.frame.height
         )
         guard let previous = smoothedCursorPoint else {
             smoothedCursorPoint = target
