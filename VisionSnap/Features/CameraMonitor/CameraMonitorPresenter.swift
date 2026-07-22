@@ -48,15 +48,12 @@ private struct CameraMonitorView: View {
     var body: some View {
         VStack(spacing: 0) {
             ZStack(alignment: .topLeading) {
-                CameraPreview(session: controller.captureSession)
-                    .aspectRatio(16 / 9, contentMode: .fit)
-
-                HandLandmarkOverlay(
+                CameraPreview(
+                    session: controller.captureSession,
                     landmarks: handTrackingService.snapshot.landmarks,
                     phase: handTrackingService.snapshot.phase
                 )
-                .aspectRatio(16 / 9, contentMode: .fit)
-                .allowsHitTesting(false)
+                    .aspectRatio(16 / 9, contentMode: .fit)
 
                 Label(
                     controller.isGestureModeEnabled ? "Camera ON" : "Camera OFF",
@@ -150,52 +147,3 @@ private struct CameraMonitorView: View {
         handTrackingService.snapshot.phase == .pinching ? .green : .secondary
     }
 }
-
-private struct HandLandmarkOverlay: View {
-    let landmarks: [HandLandmark]
-    let phase: PinchPhase
-
-    var body: some View {
-        Canvas { context, size in
-            let points = Dictionary(uniqueKeysWithValues: landmarks.map {
-                ($0.name, CGPoint(
-                    x: $0.point.x * size.width,
-                    y: (1 - $0.point.y) * size.height
-                ))
-            })
-            let color: Color = phase == .pinching ? .green : .cyan
-
-            for jointChain in handSkeleton {
-                var path = Path()
-                var hasStarted = false
-                for joint in jointChain {
-                    guard let point = points[joint] else {
-                        hasStarted = false
-                        continue
-                    }
-                    if hasStarted {
-                        path.addLine(to: point)
-                    } else {
-                        path.move(to: point)
-                        hasStarted = true
-                    }
-                }
-                context.stroke(path, with: .color(color), lineWidth: 2)
-            }
-
-            for point in points.values {
-                let dot = CGRect(x: point.x - 3, y: point.y - 3, width: 6, height: 6)
-                context.fill(Path(ellipseIn: dot), with: .color(color))
-            }
-        }
-    }
-}
-
-private let handSkeleton: [[VNHumanHandPoseObservation.JointName]] = [
-    [.wrist, .thumbCMC, .thumbMP, .thumbIP, .thumbTip],
-    [.wrist, .indexMCP, .indexPIP, .indexDIP, .indexTip],
-    [.wrist, .middleMCP, .middlePIP, .middleDIP, .middleTip],
-    [.wrist, .ringMCP, .ringPIP, .ringDIP, .ringTip],
-    [.wrist, .littleMCP, .littlePIP, .littleDIP, .littleTip],
-    [.indexMCP, .middleMCP, .ringMCP, .littleMCP],
-]
