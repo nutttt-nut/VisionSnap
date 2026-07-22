@@ -4,6 +4,7 @@ import SwiftUI
 @MainActor
 final class GestureOverlayModel: ObservableObject {
     @Published var cursorPoint: CGPoint?
+    @Published var gesturePoint: CGPoint?
     @Published var selectedWindow: TargetWindow?
     @Published var statusText: String?
 }
@@ -37,6 +38,7 @@ final class GestureOverlayPresenter {
         window?.orderOut(nil)
         window = nil
         model.cursorPoint = nil
+        model.gesturePoint = nil
         model.selectedWindow = nil
         model.statusText = nil
     }
@@ -71,16 +73,27 @@ private struct GestureOverlayView: View {
                     .background(Circle().fill(.black.opacity(0.35)))
                     .frame(width: 30, height: 30)
                     .position(cursor)
+            }
 
-                if let statusText = model.statusText {
-                    Text(statusText)
-                        .font(.system(size: 13, weight: .semibold))
+            if let gesturePoint = model.gesturePoint {
+                ZStack {
+                    Circle().fill(.purple.opacity(0.85))
+                    Image(systemName: "hand.raised.fill")
                         .foregroundStyle(.white)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 5)
-                        .background(.black.opacity(0.75), in: RoundedRectangle(cornerRadius: 6))
-                        .position(x: cursor.x + 75, y: cursor.y + 28)
                 }
+                .frame(width: 38, height: 38)
+                .position(gesturePoint)
+            }
+
+            if let statusText = model.statusText,
+               let anchor = model.cursorPoint ?? model.gesturePoint {
+                Text(statusText)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .background(.black.opacity(0.75), in: RoundedRectangle(cornerRadius: 6))
+                    .position(x: anchor.x + 85, y: anchor.y + 30)
             }
         }
         .ignoresSafeArea()

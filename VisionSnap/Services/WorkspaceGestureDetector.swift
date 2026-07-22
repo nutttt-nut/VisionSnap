@@ -7,6 +7,37 @@ enum WorkspaceGestureAction: Equatable {
     case missionControl
 }
 
+enum HandInteractionMode: Equatable {
+    case pointer
+    case workspace
+    case inactive
+}
+
+enum HandInteractionModeResolver {
+    static func resolve(
+        fingerCount: Int?,
+        phase: PinchPhase,
+        isDragging: Bool,
+        isFist: Bool
+    ) -> HandInteractionMode {
+        if isFist { return .inactive }
+        if isDragging || phase == .pinching {
+            return .pointer
+        }
+        if case .candidate = phase {
+            return .pointer
+        }
+        switch fingerCount {
+        case 1, 2:
+            return .pointer
+        case 4, 5:
+            return .workspace
+        default:
+            return .inactive
+        }
+    }
+}
+
 struct WorkspaceGestureFrame {
     let extendedFingerCount: Int?
     let palmCenter: CGPoint?

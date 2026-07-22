@@ -4,6 +4,43 @@ import Foundation
 @main
 struct WorkspaceGestureDetectorTests {
     static func main() {
+        expect(
+            HandInteractionModeResolver.resolve(
+                fingerCount: 5,
+                phase: .open,
+                isDragging: false,
+                isFist: false
+            ) == .workspace,
+            "five fingers must not control the mouse"
+        )
+        expect(
+            HandInteractionModeResolver.resolve(
+                fingerCount: 4,
+                phase: .open,
+                isDragging: false,
+                isFist: false
+            ) == .workspace,
+            "four fingers must not control the mouse"
+        )
+        expect(
+            HandInteractionModeResolver.resolve(
+                fingerCount: 1,
+                phase: .open,
+                isDragging: false,
+                isFist: false
+            ) == .pointer,
+            "one finger must control the pointer"
+        )
+        expect(
+            HandInteractionModeResolver.resolve(
+                fingerCount: 3,
+                phase: .open,
+                isDragging: false,
+                isFist: false
+            ) == .inactive,
+            "three fingers must remain inactive"
+        )
+
         var detector = WorkspaceGestureDetector()
 
         expect(detector.update(frame: frame(4, x: 0.4, y: 0.5), at: 0) == nil)

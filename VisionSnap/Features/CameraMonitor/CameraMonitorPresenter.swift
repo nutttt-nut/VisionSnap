@@ -80,6 +80,9 @@ private struct CameraMonitorView: View {
                         Text("Detection: \(detectionText)")
                             .font(.caption)
                             .foregroundStyle(detectionColor)
+                        Text("Mode: \(interactionModeText)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
 
                     Spacer()
@@ -121,6 +124,26 @@ private struct CameraMonitorView: View {
             ($0.name, $0.point)
         })
         return HandPoseAnalyzer.analyze(points).extendedFingerCount
+    }
+
+    private var interactionModeText: String {
+        let points = Dictionary(uniqueKeysWithValues: handTrackingService.snapshot.landmarks.map {
+            ($0.name, $0.point)
+        })
+        let pose = HandPoseAnalyzer.analyze(points)
+        switch HandInteractionModeResolver.resolve(
+            fingerCount: pose.extendedFingerCount,
+            phase: handTrackingService.snapshot.phase,
+            isDragging: false,
+            isFist: pose.isFist
+        ) {
+        case .pointer:
+            return "Pointer"
+        case .workspace:
+            return "Workspace gesture"
+        case .inactive:
+            return "Inactive"
+        }
     }
 
     private var detectionColor: Color {

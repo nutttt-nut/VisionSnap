@@ -43,6 +43,62 @@ final class GestureEngine {
     private func handle(_ snapshot: HandTrackingSnapshot) {
         let timestamp = ProcessInfo.processInfo.systemUptime
         let points = Dictionary(uniqueKeysWithValues: snapshot.landmarks.map { ($0.name, $0.point) })
+        let pose = HandPoseAnalyzer.analyze(points)
+        let interactionMode = HandInteractionModeResolver.resolve(
+            fingerCount: pose.extendedFingerCount,
+            phase: snapshot.phase,
+            isDragging: windowControlService.isDragging,
+            isFist: pose.isFist
+        )
+
+        if pose.isFist {
+            if windowControlService.isDragging {
+                windowControlService.cancelDrag()
+                showActionStatus("ยกเลิก — คืนตำแหน่งเดิม", at: timestamp)
+            }
+            selectedWindow = nil
+            workspaceGestureDetector.reset()
+            overlayPresenter.model.cursorPoint = nil
+            overlayPresenter.model.gesturePoint = screenPoint(from: pose.palmCenter)
+            overlayPresenter.model.selectedWindow = nil
+            overlayPresenter.model.statusText = "กำหมัด: ยกเลิก"
+            return
+        }
+
+        if interactionMode != .pointer {
+            selectedWindow = nil
+            overlayPresenter.model.cursorPoint = nil
+            overlayPresenter.model.gesturePoint = screenPoint(from: pose.palmCenter)
+            overlayPresenter.model.selectedWindow = nil
+
+            if let action = workspaceGestureDetector.update(
+                frame: WorkspaceGestureFrame(
+                    extendedFingerCount: pose.extendedFingerCount,
+                    palmCenter: mirrored(pose.palmCenter),
+                    isPinching: false
+                ),
+                at: timestamp
+            ) {
+                windowControlService.perform(action)
+                showActionStatus(statusText(for: action), at: timestamp)
+            }
+            overlayPresenter.model.statusText = currentStatus(
+                phase: snapshot.phase,
+                fingerCount: pose.extendedFingerCount,
+                timestamp: timestamp
+            )
+            return
+        }
+
+        _ = workspaceGestureDetector.update(
+            frame: WorkspaceGestureFrame(
+                extendedFingerCount: pose.extendedFingerCount,
+                palmCenter: mirrored(pose.palmCenter),
+                isPinching: true
+            ),
+            at: timestamp
+        )
+        overlayPresenter.model.gesturePoint = nil
 
         guard let cursor = cursorPoint(from: points) else {
             if windowControlService.isDragging {
@@ -50,6 +106,7 @@ final class GestureEngine {
             }
             selectedWindow = nil
             overlayPresenter.model.cursorPoint = nil
+            overlayPresenter.model.gesturePoint = nil
             overlayPresenter.model.selectedWindow = nil
             overlayPresenter.model.statusText = "ไม่พบมือ"
             workspaceGestureDetector.reset()
@@ -59,12 +116,6 @@ final class GestureEngine {
         CGWarpMouseCursorPosition(cursor)
         overlayPresenter.model.cursorPoint = cursor
 
-        let pose = HandPoseAnalyzer.analyze(points)
-        if pose.isFist, windowControlService.isDragging {
-            windowControlService.cancelDrag()
-            showActionStatus("ยกเลิก — คืนตำแหน่งเดิม", at: timestamp)
-        }
-
         handlePinch(snapshot.phase, cursor: cursor, timestamp: timestamp)
 
         if !windowControlService.isDragging, timestamp - lastSelectionTime >= 0.05 {
@@ -72,21 +123,6 @@ final class GestureEngine {
             lastSelectionTime = timestamp
         }
         overlayPresenter.model.selectedWindow = selectedWindow
-
-        if !windowControlService.isDragging {
-            let action = workspaceGestureDetector.update(
-                frame: WorkspaceGestureFrame(
-                    extendedFingerCount: pose.extendedFingerCount,
-                    palmCenter: mirrored(pose.palmCenter),
-                    isPinching: snapshot.phase == .pinching
-                ),
-                at: timestamp
-            )
-            if let action {
-                windowControlService.perform(action)
-                showActionStatus(statusText(for: action), at: timestamp)
-            }
-        }
 
         overlayPresenter.model.statusText = currentStatus(
             phase: snapshot.phase,
@@ -139,6 +175,14 @@ final class GestureEngine {
         return CGPoint(x: 1 - point.x, y: 1 - point.y)
     }
 
+    private func screenPoint(from point: CGPoint?) -> CGPoint? {
+        guard let point, let screen = NSScreen.screens.first else { return nil }
+        return CGPoint(
+            x: (1 - point.x) * screen.frame.width,
+            y: (1 - point.y) * screen.frame.height
+        )
+    }
+
     private func currentStatus(
         phase: PinchPhase,
         fingerCount: Int?,
@@ -165,6 +209,9 @@ final class GestureEngine {
         }
         if fingerCount == 5 {
             return "5 นิ้ว: ปัดขึ้น Mission Control"
+        }
+        if fingerCount == 3 {
+            return "3 นิ้ว: ไม่มีคำสั่ง"
         }
         return selectedWindow == nil ? "ชี้ไปที่หน้าต่าง" : "Pinch เพื่อจับ"
     }
