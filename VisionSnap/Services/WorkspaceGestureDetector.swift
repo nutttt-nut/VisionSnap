@@ -21,13 +21,13 @@ enum HandInteractionModeResolver {
         isDragging: Bool,
         isFist: Bool
     ) -> HandInteractionMode {
-        if isFist { return .inactive }
         if isDragging || phase == .pinching {
             return .pointer
         }
         if case .candidate = phase {
             return .pointer
         }
+        if isFist { return .inactive }
         switch fingerCount {
         case 4, 5:
             return .workspace

@@ -15,6 +15,7 @@ final class GestureEngine {
     private var selectedWindow: TargetWindow?
     private var isMouseDown = false
     private var lastCursorPoint: CGPoint?
+    private var smoothedCursorPoint: CGPoint?
     private var lastSelectionTime = -Double.infinity
     private var actionStatus: (text: String, expiresAt: TimeInterval)?
 
@@ -38,6 +39,7 @@ final class GestureEngine {
         removeEscapeMonitors()
         releaseMouseIfNeeded()
         workspaceGestureDetector.reset()
+        smoothedCursorPoint = nil
         selectedWindow = nil
         overlayPresenter.hide()
     }
@@ -54,8 +56,9 @@ final class GestureEngine {
             isFist: pose.isFist
         )
 
-        if pose.isFist {
+        if pose.isFist, !isPinchInteraction(snapshot.phase) {
             releaseMouseIfNeeded()
+            smoothedCursorPoint = nil
             selectedWindow = nil
             workspaceGestureDetector.reset()
             overlayPresenter.model.cursorPoint = nil
@@ -66,6 +69,7 @@ final class GestureEngine {
         }
 
         if interactionMode != .pointer {
+            smoothedCursorPoint = nil
             selectedWindow = nil
             overlayPresenter.model.cursorPoint = nil
             overlayPresenter.model.gesturePoint = screenPoint(from: pose.palmCenter)
@@ -100,8 +104,9 @@ final class GestureEngine {
         )
         overlayPresenter.model.gesturePoint = nil
 
-        guard let cursor = cursorPoint(from: points) else {
+        guard let cursor = cursorPoint(from: pose.palmCenter) else {
             releaseMouseIfNeeded()
+            smoothedCursorPoint = nil
             selectedWindow = nil
             overlayPresenter.model.cursorPoint = nil
             overlayPresenter.model.gesturePoint = nil
@@ -157,16 +162,31 @@ final class GestureEngine {
         }
     }
 
-    private func cursorPoint(
-        from points: [VNHumanHandPoseObservation.JointName: CGPoint]
-    ) -> CGPoint? {
-        guard let indexTip = points[.indexTip], let screen = NSScreen.screens.first else {
+    private func cursorPoint(from palmCenter: CGPoint?) -> CGPoint? {
+        guard let palmCenter, let screen = NSScreen.screens.first else {
             return nil
         }
-        return CGPoint(
-            x: (1 - indexTip.x) * screen.frame.width,
-            y: (1 - indexTip.y) * screen.frame.height
+        let target = CGPoint(
+            x: (1 - palmCenter.x) * screen.frame.width,
+            y: (1 - palmCenter.y) * screen.frame.height
         )
+        guard let previous = smoothedCursorPoint else {
+            smoothedCursorPoint = target
+            return target
+        }
+        let smoothing: CGFloat = 0.3
+        let smoothed = CGPoint(
+            x: previous.x + (target.x - previous.x) * smoothing,
+            y: previous.y + (target.y - previous.y) * smoothing
+        )
+        smoothedCursorPoint = smoothed
+        return smoothed
+    }
+
+    private func isPinchInteraction(_ phase: PinchPhase) -> Bool {
+        if phase == .pinching { return true }
+        if case .candidate = phase { return true }
+        return false
     }
 
     private func screenNormalized(_ point: CGPoint?) -> CGPoint? {

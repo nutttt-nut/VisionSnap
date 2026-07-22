@@ -44,6 +44,26 @@ struct WorkspaceGestureDetectorTests {
             ) == .inactive,
             "three fingers must remain inactive"
         )
+        expect(
+            HandInteractionModeResolver.resolve(
+                fingerCount: 0,
+                isIndexPointing: false,
+                phase: .pinching,
+                isDragging: false,
+                isFist: true
+            ) == .pointer,
+            "pinching must override fist classification"
+        )
+        expect(
+            HandInteractionModeResolver.resolve(
+                fingerCount: 0,
+                isIndexPointing: false,
+                phase: .candidate(progress: 0.5),
+                isDragging: false,
+                isFist: true
+            ) == .pointer,
+            "pinch candidate must override fist classification"
+        )
 
         var detector = WorkspaceGestureDetector()
 
