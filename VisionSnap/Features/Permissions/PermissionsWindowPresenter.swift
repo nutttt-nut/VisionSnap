@@ -1,4 +1,6 @@
 import AppKit
+import AVFoundation
+import ApplicationServices
 import SwiftUI
 
 @MainActor
@@ -10,7 +12,9 @@ final class PermissionsWindowPresenter {
 
     @discardableResult
     func showIfNeeded(onFinish: (() -> Void)? = nil) -> Bool {
-        guard !UserDefaults.standard.bool(forKey: completedKey) else {
+        let permissionsAreReady = AVCaptureDevice.authorizationStatus(for: .video) == .authorized
+            && AXIsProcessTrusted()
+        guard !UserDefaults.standard.bool(forKey: completedKey) || !permissionsAreReady else {
             return false
         }
 

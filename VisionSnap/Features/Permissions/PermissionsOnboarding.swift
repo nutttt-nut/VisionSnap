@@ -1,4 +1,5 @@
 import AVFoundation
+import AppKit
 import ApplicationServices
 import SwiftUI
 
@@ -22,6 +23,11 @@ final class PermissionsModel: ObservableObject {
     }
 
     func requestCameraPermission() {
+        guard cameraStatus == .notDetermined else {
+            openCameraSettings()
+            return
+        }
+
         AVCaptureDevice.requestAccess(for: .video) { [weak self] _ in
             Task { @MainActor in
                 self?.cameraStatus = AVCaptureDevice.authorizationStatus(for: .video)
@@ -37,6 +43,15 @@ final class PermissionsModel: ObservableObject {
 
     func refreshAccessibilityStatus() {
         isAccessibilityTrusted = AXIsProcessTrusted()
+    }
+
+    private func openCameraSettings() {
+        guard let url = URL(
+            string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Camera"
+        ) else {
+            return
+        }
+        NSWorkspace.shared.open(url)
     }
 }
 
@@ -65,6 +80,7 @@ struct PermissionsOnboarding: View {
             status: cameraStatusText,
             actionTitle: cameraActionTitle,
             action: permissions.requestCameraPermission,
+            isNextEnabled: permissions.cameraStatus == .authorized,
             nextTitle: "Continue",
             nextAction: { page = 1 }
         )
@@ -78,6 +94,7 @@ struct PermissionsOnboarding: View {
             status: permissions.isAccessibilityTrusted ? "Granted" : "Not granted",
             actionTitle: "Open System Prompt",
             action: permissions.requestAccessibilityPermission,
+            isNextEnabled: permissions.isAccessibilityTrusted,
             nextTitle: "Finish",
             nextAction: {
                 onFinish()
@@ -92,6 +109,7 @@ struct PermissionsOnboarding: View {
         status: String,
         actionTitle: String,
         action: @escaping () -> Void,
+        isNextEnabled: Bool,
         nextTitle: String,
         nextAction: @escaping () -> Void
     ) -> some View {
@@ -115,6 +133,7 @@ struct PermissionsOnboarding: View {
                 Spacer()
                 Button(nextTitle, action: nextAction)
                     .buttonStyle(.borderedProminent)
+                    .disabled(!isNextEnabled)
             }
         }
     }
@@ -130,6 +149,10 @@ struct PermissionsOnboarding: View {
     }
 
     private var cameraActionTitle: String {
-        permissions.cameraStatus == .notDetermined ? "Allow Camera" : "Refresh Status"
+        switch permissions.cameraStatus {
+        case .notDetermined: "Allow Camera"
+        case .authorized: "Camera Settings"
+        default: "Open Camera Settings"
+        }
     }
 }
