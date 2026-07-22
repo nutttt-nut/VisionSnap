@@ -14,6 +14,8 @@
 		A10000000000000000000005 /* ConflictDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000005 /* ConflictDetector.swift */; };
 		A10000000000000000000006 /* ConflictWarningPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000006 /* ConflictWarningPresenter.swift */; };
 		A10000000000000000000007 /* PermissionsWindowPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000009 /* PermissionsWindowPresenter.swift */; };
+		A10000000000000000000008 /* CameraPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000A /* CameraPreview.swift */; };
+		A10000000000000000000009 /* CameraMonitorPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000B /* CameraMonitorPresenter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +28,8 @@
 		B10000000000000000000007 /* VisionSnap.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VisionSnap.entitlements; sourceTree = "<group>"; };
 		B10000000000000000000008 /* VisionSnap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VisionSnap.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B10000000000000000000009 /* PermissionsWindowPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsWindowPresenter.swift; sourceTree = "<group>"; };
+		B1000000000000000000000A /* CameraPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreview.swift; sourceTree = "<group>"; };
+		B1000000000000000000000B /* CameraMonitorPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraMonitorPresenter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,6 +73,7 @@
 		D10000000000000000000004 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				D10000000000000000000009 /* CameraMonitor */,
 				D10000000000000000000005 /* Permissions */,
 				D10000000000000000000006 /* MenuBar */,
 				D10000000000000000000008 /* Conflicts */,
@@ -108,6 +113,15 @@
 				B10000000000000000000006 /* ConflictWarningPresenter.swift */,
 			);
 			path = Conflicts;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000009 /* CameraMonitor */ = {
+			isa = PBXGroup;
+			children = (
+				B1000000000000000000000A /* CameraPreview.swift */,
+				B1000000000000000000000B /* CameraMonitorPresenter.swift */,
+			);
+			path = CameraMonitor;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -185,6 +199,8 @@
 				A10000000000000000000005 /* ConflictDetector.swift in Sources */,
 				A10000000000000000000006 /* ConflictWarningPresenter.swift in Sources */,
 				A10000000000000000000007 /* PermissionsWindowPresenter.swift in Sources */,
+				A10000000000000000000008 /* CameraPreview.swift in Sources */,
+				A10000000000000000000009 /* CameraMonitorPresenter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

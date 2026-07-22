@@ -22,6 +22,7 @@ final class CameraService {
     private var isConfigured = false
 
     var isRunning: Bool { session.isRunning }
+    var captureSession: AVCaptureSession { session }
 
     func start() throws {
         guard AVCaptureDevice.authorizationStatus(for: .video) == .authorized else {

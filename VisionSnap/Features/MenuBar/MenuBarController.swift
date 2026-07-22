@@ -1,4 +1,5 @@
 import AppKit
+import AVFoundation
 import SwiftUI
 
 @MainActor
@@ -7,6 +8,8 @@ final class MenuBarController: ObservableObject {
     @Published private(set) var errorMessage: String?
 
     private let cameraService = CameraService()
+
+    var captureSession: AVCaptureSession { cameraService.captureSession }
 
     func toggleGestureMode() {
         if isGestureModeEnabled {
@@ -19,9 +22,14 @@ final class MenuBarController: ObservableObject {
             try cameraService.start()
             isGestureModeEnabled = true
             errorMessage = nil
+            showCameraMonitor()
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    func showCameraMonitor() {
+        CameraMonitorPresenter.shared.show(controller: self)
     }
 }
 
@@ -38,6 +46,10 @@ struct MenuBarContent: View {
         }
 
         Divider()
+
+        Button("Show Camera Monitor…") {
+            controller.showCameraMonitor()
+        }
 
         Button("Permissions…") {
             PermissionsWindowPresenter.shared.show(force: true)
