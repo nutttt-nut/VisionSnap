@@ -166,7 +166,7 @@ final class GestureEngine {
             return nil
         }
         return CGPoint(
-            x: (1 - indexTip.x) * screen.frame.width,
+            x: indexTip.x * screen.frame.width,
             y: (1 - indexTip.y) * screen.frame.height
         )
     }
