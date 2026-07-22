@@ -2,6 +2,17 @@
 
 > แทนที่ `implementation-plan.md` เดิม — เพิ่ม Phase 0 ที่หายไป และย้ายของที่เป็น "must-have ตั้งแต่ MVP" เข้ามาให้ตรงกับ `spec.md`
 
+## สถานะปัจจุบัน (อัปเดตล่าสุด 2026-07-22 จาก Oasis)
+
+Oasis กำลังเริ่มงานแล้ว **แต่เบี่ยงจากลำดับ Phase 0→1 ด้านล่าง** — Nut สั่งเพิ่ม scope ตรงกับ Oasis ระหว่างทาง (gaze-select, relative palm drag, 3x3 snap, held AX element, diagnostics — ดู `spec.md` § Scope Update) ทำให้กำลังทำงาน Phase 1 ผสมของใหม่ไปพร้อมกัน ก่อน Phase 0 (onboarding/menu bar/conflict detector) จะเสร็จสมบูรณ์
+
+- โค้ด 11 ไฟล์ **uncommitted** — หยุดพักตามคำสั่ง Nut
+- Unit tests / build / diff check ผ่าน — **physical E2E ยัง unverified**
+- Blocker: แยก grab/release ไม่ได้, pinch ล่าสุดหน้าต่างไม่ขยับ
+- แผนต่อ (ฝั่ง Oasis): verify Accessibility Granted → trace state 1 รอบ → explicit grab/release state + confirmation → verify drag/snap → **ค่อย commit**
+
+Phase list ด้านล่างยังใช้เป็น reference ได้ แต่ลำดับจริงตอนนี้ไม่ตรงเป๊ะแล้ว — เช็คความคืบหน้าจริงจาก Oasis/mailbox เป็นหลัก
+
 ## Phase 0 — Foundation (ก่อน Phase 1 เดิม, ของใหม่ทั้งหมด)
 
 เอกสารเดิมกระโดดตรงไปทำ camera+vision เลย แต่สิ่งที่ user เจอก่อนสุดคือ onboarding/permission ถ้าทำตอนหลังจะต้อง refactor ทับ flow ที่มีอยู่

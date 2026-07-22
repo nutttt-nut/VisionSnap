@@ -11,6 +11,21 @@
 | Camera privacy model | **Toggle ผ่าน menu bar/shortcut** — กล้องเปิดเฉพาะตอน gesture mode ON | ต้องมี explicit ON/OFF state, ไม่ auto-start ตอนเปิดเครื่อง |
 | Conflict กับ window manager อื่น | **Detect + เตือนอย่างน้อย** (ไม่ใช่ full resolution) | เพิ่ม module ตรวจ process/bundle ID ตอน launch, แสดง one-time warning ไม่ block |
 
+## Scope Update (2026-07-22, สั่งตรงกับ Oasis ระหว่าง implement)
+
+Nut สั่ง Oasis เพิ่ม scope เองระหว่างเริ่มงานจริง — เอกสารนี้ตามหลังโค้ดอยู่ ณ ตอนบันทึก:
+
+- **Gaze-select** — เพิ่ม eye-tracking เป็น input mode คู่กับ hand tracking (รายละเอียด design/API ยังไม่ระบุในเอกสารนี้ — ดู session/mailbox ฝั่ง Oasis สำหรับ implementation จริง)
+- **Pause eye tracking ตอน pinch** — กัน gaze กับ hand gesture ชนกัน (ป้องกัน false trigger ระหว่าง 2 input mode)
+- **Relative palm drag** — ปรับวิธีคำนวณ drag จาก absolute cursor position เป็น relative ต่อตำแหน่งเริ่ม pinch
+- **3x3 snap grid** — ขยายจาก snap 4 โซนเดิม (ซ้าย/ขวา/บน/ล่าง) เป็น grid 3x3
+- **Held AX element** — เก็บ reference `AXUIElement` ค้างไว้ระหว่าง drag แทนการ query ใหม่ทุก frame (performance)
+- **Diagnostics module** — เพิ่มเข้ามาไม่มีในแผนเดิม
+
+**ผลต่อ Non-Goals เดิม**: spec เดิมไม่เคยพูดถึง eye-tracking เลย (ทั้ง Goals และ Architecture) — ต้องถือว่า **gaze-select เป็น scope ใหม่ที่เพิ่มนอกแผนเดิม ไม่ใช่ implicit อยู่แล้ว** ใครอ่าน spec.md ต่อจากนี้ควรรู้ว่า Architecture section ด้านล่างยังไม่ได้อัปเดตให้มี `GazeTrackingService`/`EyeTrackingService` — เป็น known gap ของเอกสารนี้ ให้เช็คโค้ดจริงเป็นหลักแทนจนกว่าจะ sync กลับมา
+
+**สถานะ implement ล่าสุด (จาก Oasis, ยังไม่ commit/push)**: unit tests + build + diff check ผ่าน, physical E2E ยัง unverified. Blocker ปัจจุบัน: แยก grab/release ไม่ได้ + pinch ล่าสุดหน้าต่างไม่ขยับ. แผนต่อ: verify Accessibility permission → trace state → explicit grab/release state + confirmation → verify drag/snap ก่อน commit.
+
 ---
 
 ## Goals
