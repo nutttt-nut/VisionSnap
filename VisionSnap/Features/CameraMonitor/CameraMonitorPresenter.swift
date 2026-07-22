@@ -159,7 +159,7 @@ private struct HandLandmarkOverlay: View {
         Canvas { context, size in
             let points = Dictionary(uniqueKeysWithValues: landmarks.map {
                 ($0.name, CGPoint(
-                    x: (1 - $0.point.x) * size.width,
+                    x: $0.point.x * size.width,
                     y: (1 - $0.point.y) * size.height
                 ))
             })

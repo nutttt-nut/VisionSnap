@@ -39,7 +39,7 @@ final class CameraPreviewContainerView: NSView {
         if let connection = previewLayer.connection,
            connection.isVideoMirroringSupported {
             connection.automaticallyAdjustsVideoMirroring = false
-            connection.isVideoMirrored = true
+            connection.isVideoMirrored = false
         }
     }
 }

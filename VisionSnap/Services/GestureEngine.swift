@@ -74,7 +74,7 @@ final class GestureEngine {
             if let action = workspaceGestureDetector.update(
                 frame: WorkspaceGestureFrame(
                     extendedFingerCount: pose.extendedFingerCount,
-                    palmCenter: mirrored(pose.palmCenter),
+                    palmCenter: screenNormalized(pose.palmCenter),
                     isPinching: false
                 ),
                 at: timestamp
@@ -93,7 +93,7 @@ final class GestureEngine {
         _ = workspaceGestureDetector.update(
             frame: WorkspaceGestureFrame(
                 extendedFingerCount: pose.extendedFingerCount,
-                palmCenter: mirrored(pose.palmCenter),
+                palmCenter: screenNormalized(pose.palmCenter),
                 isPinching: true
             ),
             at: timestamp
@@ -165,20 +165,20 @@ final class GestureEngine {
             return nil
         }
         return CGPoint(
-            x: (1 - indexTip.x) * screen.frame.width,
+            x: indexTip.x * screen.frame.width,
             y: (1 - indexTip.y) * screen.frame.height
         )
     }
 
-    private func mirrored(_ point: CGPoint?) -> CGPoint? {
+    private func screenNormalized(_ point: CGPoint?) -> CGPoint? {
         guard let point else { return nil }
-        return CGPoint(x: 1 - point.x, y: 1 - point.y)
+        return CGPoint(x: point.x, y: 1 - point.y)
     }
 
     private func screenPoint(from point: CGPoint?) -> CGPoint? {
         guard let point, let screen = NSScreen.screens.first else { return nil }
         return CGPoint(
-            x: (1 - point.x) * screen.frame.width,
+            x: point.x * screen.frame.width,
             y: (1 - point.y) * screen.frame.height
         )
     }
