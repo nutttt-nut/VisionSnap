@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import Vision
 
 @MainActor
 final class CameraMonitorPresenter {
@@ -37,12 +38,25 @@ final class CameraMonitorPresenter {
 
 private struct CameraMonitorView: View {
     @ObservedObject var controller: MenuBarController
+    @ObservedObject private var handTrackingService: HandTrackingService
+
+    init(controller: MenuBarController) {
+        self.controller = controller
+        handTrackingService = controller.handTrackingService
+    }
 
     var body: some View {
         VStack(spacing: 0) {
             ZStack(alignment: .topLeading) {
                 CameraPreview(session: controller.captureSession)
                     .aspectRatio(16 / 9, contentMode: .fit)
+
+                HandLandmarkOverlay(
+                    landmarks: handTrackingService.snapshot.landmarks,
+                    phase: handTrackingService.snapshot.phase
+                )
+                .aspectRatio(16 / 9, contentMode: .fit)
+                .allowsHitTesting(false)
 
                 Label(
                     controller.isGestureModeEnabled ? "Camera ON" : "Camera OFF",
@@ -63,9 +77,9 @@ private struct CameraMonitorView: View {
                     VStack(alignment: .leading, spacing: 3) {
                         Text("Input: Built-in camera")
                             .font(.callout.bold())
-                        Text("Detection: Not implemented yet (Phase 1)")
+                        Text("Detection: \(detectionText)")
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(detectionColor)
                     }
 
                     Spacer()
@@ -86,4 +100,72 @@ private struct CameraMonitorView: View {
         }
         .frame(minWidth: 360, minHeight: 280)
     }
+
+    private var detectionText: String {
+        switch handTrackingService.snapshot.phase {
+        case .noHand:
+            "No hand"
+        case .lowConfidence:
+            "Low confidence"
+        case .open:
+            "Hand detected"
+        case let .candidate(progress):
+            "Pinch candidate \(Int(progress * 100))%"
+        case .pinching:
+            "PINCHING"
+        }
+    }
+
+    private var detectionColor: Color {
+        handTrackingService.snapshot.phase == .pinching ? .green : .secondary
+    }
 }
+
+private struct HandLandmarkOverlay: View {
+    let landmarks: [HandLandmark]
+    let phase: PinchPhase
+
+    var body: some View {
+        Canvas { context, size in
+            let points = Dictionary(uniqueKeysWithValues: landmarks.map {
+                ($0.name, CGPoint(
+                    x: (1 - $0.point.x) * size.width,
+                    y: (1 - $0.point.y) * size.height
+                ))
+            })
+            let color: Color = phase == .pinching ? .green : .cyan
+
+            for jointChain in handSkeleton {
+                var path = Path()
+                var hasStarted = false
+                for joint in jointChain {
+                    guard let point = points[joint] else {
+                        hasStarted = false
+                        continue
+                    }
+                    if hasStarted {
+                        path.addLine(to: point)
+                    } else {
+                        path.move(to: point)
+                        hasStarted = true
+                    }
+                }
+                context.stroke(path, with: .color(color), lineWidth: 2)
+            }
+
+            for point in points.values {
+                let dot = CGRect(x: point.x - 3, y: point.y - 3, width: 6, height: 6)
+                context.fill(Path(ellipseIn: dot), with: .color(color))
+            }
+        }
+    }
+}
+
+private let handSkeleton: [[VNHumanHandPoseObservation.JointName]] = [
+    [.wrist, .thumbCMC, .thumbMP, .thumbIP, .thumbTip],
+    [.wrist, .indexMCP, .indexPIP, .indexDIP, .indexTip],
+    [.wrist, .middleMCP, .middlePIP, .middleDIP, .middleTip],
+    [.wrist, .ringMCP, .ringPIP, .ringDIP, .ringTip],
+    [.wrist, .littleMCP, .littlePIP, .littleDIP, .littleTip],
+    [.indexMCP, .middleMCP, .ringMCP, .littleMCP],
+]

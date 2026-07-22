@@ -23,7 +23,7 @@ final class CameraPreviewContainerView: NSView {
         wantsLayer = true
         layer = CALayer()
         layer?.backgroundColor = NSColor.black.cgColor
-        previewLayer.videoGravity = .resizeAspectFill
+        previewLayer.videoGravity = .resizeAspect
         layer?.addSublayer(previewLayer)
     }
 

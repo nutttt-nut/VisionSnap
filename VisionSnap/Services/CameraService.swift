@@ -19,7 +19,14 @@ enum CameraServiceError: LocalizedError {
 
 final class CameraService {
     private let session = AVCaptureSession()
+    private let videoOutput = AVCaptureVideoDataOutput()
+    private let frameDelegate: AVCaptureVideoDataOutputSampleBufferDelegate
+    private let frameQueue = DispatchQueue(label: "com.visionsnap.hand-tracking")
     private var isConfigured = false
+
+    init(frameDelegate: AVCaptureVideoDataOutputSampleBufferDelegate) {
+        self.frameDelegate = frameDelegate
+    }
 
     var isRunning: Bool { session.isRunning }
     var captureSession: AVCaptureSession { session }
@@ -64,6 +71,17 @@ final class CameraService {
         }
 
         session.addInput(input)
+        videoOutput.alwaysDiscardsLateVideoFrames = true
+        videoOutput.videoSettings = [
+            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
+        ]
+        videoOutput.setSampleBufferDelegate(frameDelegate, queue: frameQueue)
+
+        guard session.canAddOutput(videoOutput) else {
+            throw CameraServiceError.inputUnavailable
+        }
+
+        session.addOutput(videoOutput)
         isConfigured = true
     }
 }

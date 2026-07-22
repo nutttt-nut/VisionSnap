@@ -17,7 +17,7 @@ Phase 0 foundation is in progress: the macOS 13+ SwiftUI app scaffold, permissio
 - Swift + SwiftUI, macOS 13+ target
 - Distribution: direct download + notarization, **not sandboxed** (Accessibility API requires it — see spec.md Distribution section for why)
 - Camera is off by default, toggled via menu bar / hotkey
-- Camera Monitor shows the live input and explicitly reports that hand detection starts in Phase 1
+- Camera Monitor shows live hand landmarks and pinch diagnostics
 - MVP scope: one-hand pinch-drag-drop + cancel gesture + basic snap, single (primary) display only
 
 ## Privacy
