@@ -130,6 +130,7 @@ private struct CameraMonitorView: View {
         let pose = HandPoseAnalyzer.analyze(points)
         switch HandInteractionModeResolver.resolve(
             fingerCount: pose.extendedFingerCount,
+            isIndexPointing: pose.isIndexPointing,
             phase: handTrackingService.snapshot.phase,
             isDragging: false,
             isFist: pose.isFist

@@ -46,6 +46,7 @@ final class GestureEngine {
         let pose = HandPoseAnalyzer.analyze(points)
         let interactionMode = HandInteractionModeResolver.resolve(
             fingerCount: pose.extendedFingerCount,
+            isIndexPointing: pose.isIndexPointing,
             phase: snapshot.phase,
             isDragging: windowControlService.isDragging,
             isFist: pose.isFist

@@ -7,6 +7,7 @@ struct WorkspaceGestureDetectorTests {
         expect(
             HandInteractionModeResolver.resolve(
                 fingerCount: 5,
+                isIndexPointing: false,
                 phase: .open,
                 isDragging: false,
                 isFist: false
@@ -16,6 +17,7 @@ struct WorkspaceGestureDetectorTests {
         expect(
             HandInteractionModeResolver.resolve(
                 fingerCount: 4,
+                isIndexPointing: false,
                 phase: .open,
                 isDragging: false,
                 isFist: false
@@ -25,6 +27,7 @@ struct WorkspaceGestureDetectorTests {
         expect(
             HandInteractionModeResolver.resolve(
                 fingerCount: 1,
+                isIndexPointing: true,
                 phase: .open,
                 isDragging: false,
                 isFist: false
@@ -34,6 +37,7 @@ struct WorkspaceGestureDetectorTests {
         expect(
             HandInteractionModeResolver.resolve(
                 fingerCount: 3,
+                isIndexPointing: false,
                 phase: .open,
                 isDragging: false,
                 isFist: false

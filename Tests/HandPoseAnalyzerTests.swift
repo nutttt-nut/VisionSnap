@@ -13,6 +13,19 @@ struct HandPoseAnalyzerTests {
         let fourFingers = points(thumbTip: CGPoint(x: 0.48, y: 0.27))
         expect(HandPoseAnalyzer.analyze(fourFingers).extendedFingerCount == 4, "folded thumb must report 4")
 
+        var pointing = points(
+            thumbTip: CGPoint(x: 0.48, y: 0.24),
+            fingerTipY: 0.27,
+            fingerInnerY: 0.25
+        )
+        pointing[.indexPIP] = CGPoint(x: 0.4, y: 0.55)
+        pointing[.indexTip] = CGPoint(x: 0.4, y: 0.85)
+        expect(HandPoseAnalyzer.analyze(pointing).isIndexPointing, "index-only pose must point")
+
+        pointing[.middlePIP] = CGPoint(x: 0.5, y: 0.55)
+        pointing[.middleTip] = CGPoint(x: 0.5, y: 0.85)
+        expect(!HandPoseAnalyzer.analyze(pointing).isIndexPointing, "V pose must not point")
+
         let fist = points(
             thumbTip: CGPoint(x: 0.48, y: 0.24),
             fingerTipY: 0.27,

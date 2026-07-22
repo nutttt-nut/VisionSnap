@@ -16,6 +16,7 @@ enum HandInteractionMode: Equatable {
 enum HandInteractionModeResolver {
     static func resolve(
         fingerCount: Int?,
+        isIndexPointing: Bool,
         phase: PinchPhase,
         isDragging: Bool,
         isFist: Bool
@@ -28,12 +29,10 @@ enum HandInteractionModeResolver {
             return .pointer
         }
         switch fingerCount {
-        case 1, 2:
-            return .pointer
         case 4, 5:
             return .workspace
         default:
-            return .inactive
+            return isIndexPointing ? .pointer : .inactive
         }
     }
 }
