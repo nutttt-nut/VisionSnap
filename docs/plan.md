@@ -4,13 +4,14 @@
 
 ## สถานะปัจจุบัน (อัปเดตล่าสุด 2026-07-23 จาก Oasis)
 
-Oasis ปิด Phase 0 แล้วหลังจากงานเบี่ยงไปทำ scope เพิ่มระหว่างทาง (gaze-select, relative palm drag, 3x3 snap, held AX element, diagnostics — ดู `spec.md` § Scope Update)
+Oasis ปิด Phase 0 และ Phase 1 แล้วหลังจากงานเบี่ยงไปทำ scope เพิ่มระหว่างทาง (gaze-select, relative palm drag, 3x3 snap, held AX element, diagnostics — ดู `spec.md` § Scope Update)
 
 - gaze-select, relative drag, snap grid, diagnostics และ stable signing อยู่ใน implementation commit แล้ว
 - Unit tests / build / diff check ผ่าน; physical drag บนจอหลักผ่านจากการทดสอบของ Nut
 - Phase 0 onboarding/menu bar/conflict detector ผ่าน implementation + physical evidence แล้ว
+- Phase 1 settings/global hotkey/camera auto-off ผ่าน unit test, build และ physical run ของ Nut แล้ว
 - Multi-monitor และ demo reliability 9/10 ยัง **UNVERIFIED**
-- แผนต่อ: ปิด Phase 1 settings/auto-off ก่อนขยาย scope เพิ่ม
+- แผนต่อ: ทำ trackpad input ตาม `plan-trackpad.md` โดยผ่าน live-apply/crash-restore gates ก่อน ship
 
 Phase list ด้านล่างยังใช้เป็น reference ได้ แต่ลำดับจริงตอนนี้ไม่ตรงเป๊ะแล้ว — เช็คความคืบหน้าจริงจาก Oasis/mailbox เป็นหลัก
 
@@ -44,10 +45,16 @@ Evidence (2026-07-23):
 - [x] Drag window
 - [x] **Cancel gesture (กำหมัด) + Escape key cancel** — ย้ายมาจาก Phase 3/technical-suggest เข้า MVP เพราะเป็น safety net ที่ต้องมีตั้งแต่ demo แรก ไม่งั้น false positive จะทำลาย trust ทันที
 - [x] 4-finger horizontal Desktop switch + 5-finger upward Mission Control
-- [ ] Basic settings panel (รวม hotkey config + auto-timeout กล้อง)
-- [ ] Auto-off กล้องถ้าไม่มีมือใน frame >5 นาที (default, ปรับได้)
+- [x] Basic settings panel (รวม hotkey config + auto-timeout กล้อง)
+- [x] Auto-off กล้องถ้าไม่มีมือใน frame >5 นาที (default, ปรับได้)
 
 Success Criteria: ย้ายหน้าต่างด้วยมือเดียวได้เสถียร **และ** ยกเลิกได้ทันทีถ้าจับผิด **และ** กล้องไม่ค้างเปิดตอนไม่ได้ใช้
+
+Evidence (2026-07-23):
+
+- `CameraAutoOffPolicyTests` และ `xcodebuild` ผ่าน
+- Nut ทดสอบ global hotkey `Control + Option + V` จากแอปอื่น: กล้อง ON/OFF ได้
+- Nut ตั้ง auto-off 1 นาที เปิดกล้องและไม่ยื่นมือ: กล้อง OFF เองตาม timeout
 
 ---
 

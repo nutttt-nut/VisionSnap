@@ -23,6 +23,8 @@
 		A1000000000000000000000E /* GestureEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000010 /* GestureEngine.swift */; };
 		A1000000000000000000000F /* GestureOverlayPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000011 /* GestureOverlayPresenter.swift */; };
 		A10000000000000000000010 /* HandPoseAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000012 /* HandPoseAnalyzer.swift */; };
+		A10000000000000000000011 /* CameraAutoOffPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000013 /* CameraAutoOffPolicy.swift */; };
+		A10000000000000000000012 /* VisionSnapSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000014 /* VisionSnapSettings.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +46,8 @@
 		B10000000000000000000010 /* GestureEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestureEngine.swift; sourceTree = "<group>"; };
 		B10000000000000000000011 /* GestureOverlayPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestureOverlayPresenter.swift; sourceTree = "<group>"; };
 		B10000000000000000000012 /* HandPoseAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandPoseAnalyzer.swift; sourceTree = "<group>"; };
+		B10000000000000000000013 /* CameraAutoOffPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraAutoOffPolicy.swift; sourceTree = "<group>"; };
+		B10000000000000000000014 /* VisionSnapSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionSnapSettings.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,6 +90,7 @@
 				B1000000000000000000000F /* WindowControlService.swift */,
 				B10000000000000000000010 /* GestureEngine.swift */,
 				B10000000000000000000012 /* HandPoseAnalyzer.swift */,
+				B10000000000000000000013 /* CameraAutoOffPolicy.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -98,6 +103,7 @@
 				D10000000000000000000005 /* Permissions */,
 				D10000000000000000000006 /* MenuBar */,
 				D10000000000000000000008 /* Conflicts */,
+				D1000000000000000000000B /* Settings */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -151,6 +157,14 @@
 				B10000000000000000000011 /* GestureOverlayPresenter.swift */,
 			);
 			path = Overlay;
+			sourceTree = "<group>";
+		};
+		D1000000000000000000000B /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000014 /* VisionSnapSettings.swift */,
+			);
+			path = Settings;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -237,6 +251,8 @@
 				A1000000000000000000000E /* GestureEngine.swift in Sources */,
 				A1000000000000000000000F /* GestureOverlayPresenter.swift in Sources */,
 				A10000000000000000000010 /* HandPoseAnalyzer.swift in Sources */,
+				A10000000000000000000011 /* CameraAutoOffPolicy.swift in Sources */,
+				A10000000000000000000012 /* VisionSnapSettings.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
