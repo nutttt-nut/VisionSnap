@@ -1,4 +1,5 @@
 import ApplicationServices
+import Foundation
 import SwiftUI
 
 @main
@@ -23,7 +24,7 @@ struct VisionSnapApp: App {
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
-        print("[GESTURE] AXIsProcessTrusted=\(AXIsProcessTrusted())")
+        fputs("[GESTURE] AXIsProcessTrusted=\(AXIsProcessTrusted())\n", stderr)
         let showConflicts = {
             let conflicts = ConflictDetector().detect()
             ConflictWarningPresenter.shared.showIfNeeded(conflicts: conflicts)
@@ -35,10 +36,5 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if !didShowOnboarding {
             showConflicts()
         }
-    }
-
-    func applicationWillTerminate(_ notification: Notification) {
-        TrackpadInputService.shared.stop()
-        _ = TrackpadNativeGestureManager.shared.restore()
     }
 }

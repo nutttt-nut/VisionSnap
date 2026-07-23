@@ -67,21 +67,6 @@ final class GestureEngine {
         overlayPresenter.hide()
     }
 
-    func handleTrackpadFrame(
-        _ frame: WorkspaceGestureFrame,
-        at timestamp: TimeInterval
-    ) {
-        guard let action = workspaceGestureDetector.update(
-            frame: frame,
-            source: .trackpad,
-            at: timestamp
-        ) else {
-            return
-        }
-        windowControlService.perform(action)
-        print("[TRACKPAD] action=\(statusText(for: action))")
-    }
-
     private func handle(_ snapshot: HandTrackingSnapshot) {
         let timestamp = ProcessInfo.processInfo.systemUptime
         updateGestureDebugAttempt(with: snapshot)
@@ -128,7 +113,6 @@ final class GestureEngine {
                     palmCenter: screenNormalized(pose.palmCenter),
                     isPinching: false
                 ),
-                source: .camera,
                 at: timestamp
             ) {
                 windowControlService.perform(action)
@@ -148,7 +132,6 @@ final class GestureEngine {
                 palmCenter: screenNormalized(pose.palmCenter),
                 isPinching: true
             ),
-            source: .camera,
             at: timestamp
         )
         overlayPresenter.model.gesturePoint = nil
@@ -366,18 +349,18 @@ final class GestureEngine {
 
     private func finishGestureDebugAttempt() {
         guard let attempt = gestureDebugAttempt else { return }
-        print(
-            String(
-                format: "[GESTURE] conf=%.2f holdMs=%d enteredGRAB=%@ axElem=%@ targetDelta=(%.1f,%.1f) axSetPosResult=%@",
-                attempt.confidence,
-                attempt.holdMilliseconds,
-                attempt.enteredGrab ? "y" : "n",
-                attempt.axElement ?? "nil",
-                attempt.targetDelta.x,
-                attempt.targetDelta.y,
-                attempt.axSetPositionResult.map { String($0.rawValue) } ?? "nil"
-            )
-        )
+        if let line = String(
+            format: "[GESTURE] conf=%.2f holdMs=%d enteredGRAB=%@ axElem=%@ targetDelta=(%.1f,%.1f) axSetPosResult=%@\n",
+            attempt.confidence,
+            attempt.holdMilliseconds,
+            attempt.enteredGrab ? "y" : "n",
+            attempt.axElement ?? "nil",
+            attempt.targetDelta.x,
+            attempt.targetDelta.y,
+            attempt.axSetPositionResult.map { String($0.rawValue) } ?? "nil"
+        ).data(using: .utf8) {
+            FileHandle.standardError.write(line)
+        }
         gestureDebugAttempt = nil
     }
 

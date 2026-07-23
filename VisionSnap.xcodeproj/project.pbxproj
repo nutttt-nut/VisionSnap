@@ -25,8 +25,6 @@
 		A10000000000000000000010 /* HandPoseAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000012 /* HandPoseAnalyzer.swift */; };
 		A10000000000000000000011 /* CameraAutoOffPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000013 /* CameraAutoOffPolicy.swift */; };
 		A10000000000000000000012 /* VisionSnapSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000014 /* VisionSnapSettings.swift */; };
-		A10000000000000000000013 /* TrackpadInputService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000015 /* TrackpadInputService.swift */; };
-		A10000000000000000000014 /* TrackpadNativeGestureManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000016 /* TrackpadNativeGestureManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -50,8 +48,6 @@
 		B10000000000000000000012 /* HandPoseAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandPoseAnalyzer.swift; sourceTree = "<group>"; };
 		B10000000000000000000013 /* CameraAutoOffPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraAutoOffPolicy.swift; sourceTree = "<group>"; };
 		B10000000000000000000014 /* VisionSnapSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionSnapSettings.swift; sourceTree = "<group>"; };
-		B10000000000000000000015 /* TrackpadInputService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackpadInputService.swift; sourceTree = "<group>"; };
-		B10000000000000000000016 /* TrackpadNativeGestureManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackpadNativeGestureManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,8 +91,6 @@
 				B10000000000000000000010 /* GestureEngine.swift */,
 				B10000000000000000000012 /* HandPoseAnalyzer.swift */,
 				B10000000000000000000013 /* CameraAutoOffPolicy.swift */,
-				B10000000000000000000015 /* TrackpadInputService.swift */,
-				B10000000000000000000016 /* TrackpadNativeGestureManager.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -259,8 +253,6 @@
 				A10000000000000000000010 /* HandPoseAnalyzer.swift in Sources */,
 				A10000000000000000000011 /* CameraAutoOffPolicy.swift in Sources */,
 				A10000000000000000000012 /* VisionSnapSettings.swift in Sources */,
-				A10000000000000000000013 /* TrackpadInputService.swift in Sources */,
-				A10000000000000000000014 /* TrackpadNativeGestureManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

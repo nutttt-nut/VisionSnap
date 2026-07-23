@@ -140,73 +140,25 @@ struct WorkspaceGestureDetectorTests {
         )
 
         detector.reset()
-        expect(detector.update(frame: frame(5, x: 0.5, y: 0.3), at: 4.0) == nil)
+        expect(detector.update(frame: frame(5, x: 0.5, y: 0.7), at: 4.0) == nil)
         expect(
-            detector.update(frame: frame(5, x: 0.5, y: 0.45), at: 4.2) == .missionControl,
-            "five-finger upward swipe must open Mission Control"
+            detector.update(frame: frame(5, x: 0.5, y: 0.5), at: 4.2) == .missionControl,
+            "five-finger upward hand swipe must open Mission Control"
+        )
+        expect(
+            detector.update(frame: frame(5, x: 0.5, y: 0.3), at: 4.3) == nil,
+            "one pose must trigger Mission Control only once"
         )
 
         detector.reset()
-        expect(detector.update(frame: frame(4, x: 0.5, y: 0.5), at: 4.5) == nil)
+        expect(detector.update(frame: frame(4, x: 0.5, y: 0.7), at: 5.0) == nil)
         expect(
-            detector.update(frame: frame(5, x: 0.5, y: 0.65), at: 4.55) == nil,
-            "finger-count transition must restart recognition"
+            detector.update(frame: frame(5, x: 0.5, y: 0.5), at: 5.2) == nil,
+            "finger-count changes must restart recognition"
         )
         expect(
-            detector.update(frame: frame(5, x: 0.5, y: 0.66), at: 4.60) == nil,
-            "finger count must remain stable before recognition"
-        )
-        expect(
-            detector.update(frame: frame(5, x: 0.5, y: 0.80), at: 4.75) == .missionControl,
+            detector.update(frame: frame(5, x: 0.5, y: 0.3), at: 5.4) == .missionControl,
             "stable five-finger movement must still trigger"
-        )
-
-        detector.reset()
-        expect(detector.update(frame: frame(6, x: 0.5, y: 0.4), at: 4.8) == nil)
-        expect(
-            detector.update(frame: frame(5, x: 0.5, y: 0.55), at: 4.9) == .missionControl,
-            "five-or-more contacts must stay in one Mission Control gesture"
-        )
-        expect(detector.update(frame: frame(4, x: 0.5, y: 0.55), at: 5.0) == nil)
-        expect(
-            detector.update(frame: frame(4, x: 0.3, y: 0.55), at: 5.2) == nil,
-            "four-finger dropout after five fingers must not trigger Desktop"
-        )
-        expect(detector.update(frame: frame(5, x: 0.5, y: 0.4), at: 5.3) == nil)
-        expect(
-            detector.update(frame: frame(5, x: 0.5, y: 0.7), at: 5.4) == nil,
-            "one touch sequence must trigger only once despite count flicker"
-        )
-        _ = detector.update(frame: frame(2, x: 0.5, y: 0.5), at: 5.5)
-        expect(detector.update(frame: frame(5, x: 0.5, y: 0.4), at: 5.8) == nil)
-        expect(
-            detector.update(frame: frame(5, x: 0.5, y: 0.7), at: 6.0) == .missionControl,
-            "lifting below four fingers must unlock the next sequence"
-        )
-
-        detector.reset()
-        expect(detector.update(
-            frame: frame(4, x: 0.4, y: 0.5),
-            source: .camera,
-            at: 7.0
-        ) == nil)
-        expect(detector.update(
-            frame: frame(4, x: 0.6, y: 0.5),
-            source: .camera,
-            at: 7.2
-        ) == .switchDesktopLeft)
-        expect(detector.update(
-            frame: frame(4, x: 0.6, y: 0.5),
-            source: .trackpad,
-            at: 7.3
-        ) == nil)
-        expect(
-            detector.update(
-                frame: frame(4, x: 0.4, y: 0.5),
-                source: .trackpad,
-                at: 7.5
-            ) == nil,
-            "camera and trackpad must share one action cooldown"
         )
 
         print("WorkspaceGestureDetectorTests: all checks passed")
