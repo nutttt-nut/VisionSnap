@@ -46,9 +46,12 @@ enum CameraAutoOffInterval: Int, CaseIterable, Identifiable {
 
 @MainActor
 final class VisionSnapSettings: ObservableObject {
+    static let shared = VisionSnapSettings()
+
     private enum Key {
         static let hotkey = "gestureModeHotkey"
         static let cameraAutoOff = "cameraAutoOffSeconds"
+        static let trackpadEnabled = "trackpadWorkspaceGesturesEnabled"
     }
 
     @Published var hotkey: GestureHotkey {
@@ -57,6 +60,10 @@ final class VisionSnapSettings: ObservableObject {
 
     @Published var cameraAutoOff: CameraAutoOffInterval {
         didSet { defaults.set(cameraAutoOff.rawValue, forKey: Key.cameraAutoOff) }
+    }
+
+    @Published var trackpadEnabled: Bool {
+        didSet { defaults.set(trackpadEnabled, forKey: Key.trackpadEnabled) }
     }
 
     private let defaults: UserDefaults
@@ -74,6 +81,7 @@ final class VisionSnapSettings: ObservableObject {
                 rawValue: defaults.integer(forKey: Key.cameraAutoOff)
             ) ?? .fiveMinutes
         }
+        trackpadEnabled = defaults.bool(forKey: Key.trackpadEnabled)
     }
 }
 
@@ -134,7 +142,7 @@ final class SettingsWindowPresenter {
         }
 
         let window = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 420, height: 240),
+            contentRect: NSRect(x: 0, y: 0, width: 420, height: 320),
             styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false
@@ -173,8 +181,16 @@ private struct VisionSnapSettingsView: View {
             Text("The camera is always off when gesture mode is off.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+
+            Divider()
+
+            Toggle("Trackpad workspace gestures", isOn: $settings.trackpadEnabled)
+
+            Text("While enabled, VisionSnap temporarily turns off macOS’s native 4-finger horizontal swipe to prevent double actions, then restores your original setting when disabled or quit.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
         .padding(24)
-        .frame(width: 420, height: 240)
+        .frame(width: 420, height: 320)
     }
 }

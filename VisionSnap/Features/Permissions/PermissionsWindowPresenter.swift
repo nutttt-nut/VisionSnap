@@ -33,7 +33,7 @@ final class PermissionsWindowPresenter {
             return
         }
 
-        let view = PermissionsOnboarding { [weak self] in
+        let view = PermissionsOnboarding(settings: VisionSnapSettings.shared) { [weak self] in
             guard let self else { return }
             UserDefaults.standard.set(true, forKey: completedKey)
             windowController?.close()

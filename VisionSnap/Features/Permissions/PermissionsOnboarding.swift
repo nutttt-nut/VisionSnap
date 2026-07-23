@@ -58,14 +58,17 @@ final class PermissionsModel: ObservableObject {
 struct PermissionsOnboarding: View {
     @StateObject private var permissions = PermissionsModel()
     @State private var page = 0
+    @ObservedObject var settings: VisionSnapSettings
     let onFinish: () -> Void
 
     var body: some View {
         VStack(spacing: 24) {
             if page == 0 {
                 cameraPage
-            } else {
+            } else if page == 1 {
                 accessibilityPage
+            } else {
+                trackpadPage
             }
         }
         .padding(32)
@@ -95,11 +98,34 @@ struct PermissionsOnboarding: View {
             actionTitle: "Open System Prompt",
             action: permissions.requestAccessibilityPermission,
             isNextEnabled: permissions.isAccessibilityTrusted,
-            nextTitle: "Finish",
+            nextTitle: "Continue",
             nextAction: {
-                onFinish()
+                page = 2
             }
         )
+    }
+
+    private var trackpadPage: some View {
+        VStack(spacing: 18) {
+            Image(systemName: "rectangle.and.hand.point.up.left")
+                .font(.system(size: 42))
+                .foregroundStyle(.tint)
+
+            Text("Optional Trackpad Gestures")
+                .font(.title2.bold())
+
+            Text("If enabled, VisionSnap temporarily turns off macOS’s native 4-finger horizontal swipe while VisionSnap runs, then restores your original setting when disabled or quit.")
+                .multilineTextAlignment(.center)
+                .foregroundStyle(.secondary)
+
+            Toggle("Enable trackpad workspace gestures", isOn: $settings.trackpadEnabled)
+
+            HStack {
+                Spacer()
+                Button("Finish", action: onFinish)
+                    .buttonStyle(.borderedProminent)
+            }
+        }
     }
 
     private func permissionPage(

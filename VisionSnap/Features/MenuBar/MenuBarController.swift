@@ -13,16 +13,28 @@ final class MenuBarController: ObservableObject {
     private let cameraService: CameraService
     private let gestureEngine: GestureEngine
     private let hotkeyMonitor = GestureHotkeyMonitor()
+    private let trackpadInputService = TrackpadInputService.shared
+    private let trackpadNativeGestureManager = TrackpadNativeGestureManager.shared
     private var lastHandSeenAt: TimeInterval?
     private var cancellables = Set<AnyCancellable>()
 
     init() {
         let handTrackingService = HandTrackingService()
-        let settings = VisionSnapSettings()
+        let settings = VisionSnapSettings.shared
         self.handTrackingService = handTrackingService
         self.settings = settings
         cameraService = CameraService(frameDelegate: handTrackingService)
         gestureEngine = GestureEngine(trackingService: handTrackingService)
+        trackpadInputService.onFrame = { [weak gestureEngine] frame, timestamp in
+            gestureEngine?.handleTrackpadFrame(frame, at: timestamp)
+        }
+        if trackpadNativeGestureManager.hasPendingRestore {
+            let restored = trackpadNativeGestureManager.restorePendingAtLaunch()
+            settings.trackpadEnabled = false
+            errorMessage = restored
+                ? "Recovered the native trackpad setting after an interrupted session."
+                : "Could not restore the native trackpad setting. Trackpad mode remains off."
+        }
         observeSettingsAndTracking()
     }
 
@@ -60,6 +72,13 @@ final class MenuBarController: ObservableObject {
             }
             .store(in: &cancellables)
 
+        settings.$trackpadEnabled
+            .removeDuplicates()
+            .sink { [weak self] isEnabled in
+                self?.setTrackpadModeEnabled(isEnabled)
+            }
+            .store(in: &cancellables)
+
         handTrackingService.$snapshot
             .sink { [weak self] snapshot in
                 guard !snapshot.landmarks.isEmpty else { return }
@@ -87,6 +106,30 @@ final class MenuBarController: ObservableObject {
         }
         stopGestureMode()
         errorMessage = "Gesture mode turned off after \(settings.cameraAutoOff.title) without a hand."
+    }
+
+    private func setTrackpadModeEnabled(_ isEnabled: Bool) {
+        if !isEnabled {
+            trackpadInputService.stop()
+            guard trackpadNativeGestureManager.restore() else {
+                errorMessage = "Could not restore the native trackpad setting."
+                return
+            }
+            return
+        }
+
+        do {
+            try trackpadNativeGestureManager.disableNativeSwipe()
+            try trackpadInputService.start()
+            errorMessage = nil
+        } catch {
+            trackpadInputService.stop()
+            _ = trackpadNativeGestureManager.restore()
+            errorMessage = error.localizedDescription
+            if settings.trackpadEnabled {
+                settings.trackpadEnabled = false
+            }
+        }
     }
 
     private func stopGestureMode() {

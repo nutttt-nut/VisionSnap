@@ -36,4 +36,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             showConflicts()
         }
     }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        TrackpadInputService.shared.stop()
+        _ = TrackpadNativeGestureManager.shared.restore()
+    }
 }

@@ -4,6 +4,12 @@ import Foundation
 enum WorkspaceGestureAction: Equatable {
     case switchDesktopLeft
     case switchDesktopRight
+    case missionControl
+}
+
+enum WorkspaceGestureSource: Hashable {
+    case camera
+    case trackpad
 }
 
 enum HandInteractionMode: Equatable {
@@ -124,7 +130,7 @@ enum HandInteractionModeResolver {
             return .pointer
         }
         if isFist { return .inactive }
-        return fingerCount == 4 ? .workspace : .inactive
+        return fingerCount == 4 || fingerCount == 5 ? .workspace : .inactive
     }
 }
 
@@ -135,69 +141,118 @@ struct WorkspaceGestureFrame {
 }
 
 struct WorkspaceGestureDetector {
+    private struct PoseState {
+        var isActive = false
+        var startPoint: CGPoint?
+        var didTrigger = false
+        var fingerCount = 0
+        var stableSince = -Double.infinity
+    }
+
     let swipeThreshold: CGFloat
     let cooldown: TimeInterval
+    let stableCountDelay: TimeInterval
+    let liftGap: TimeInterval
 
-    private var isActive = false
-    private var startPoint: CGPoint?
-    private var didTrigger = false
+    private var states: [WorkspaceGestureSource: PoseState] = [:]
+    private var suppressFourUntil: [WorkspaceGestureSource: TimeInterval] = [:]
+    private var sequenceTriggered: Set<WorkspaceGestureSource> = []
+    private var lastRelevantTime: [WorkspaceGestureSource: TimeInterval] = [:]
     private var lastTriggerTime = -Double.infinity
 
-    init(swipeThreshold: CGFloat = 0.10, cooldown: TimeInterval = 0.8) {
+    init(
+        swipeThreshold: CGFloat = 0.10,
+        cooldown: TimeInterval = 0.8,
+        stableCountDelay: TimeInterval = 0.08,
+        liftGap: TimeInterval = 0.25
+    ) {
         self.swipeThreshold = swipeThreshold
         self.cooldown = cooldown
+        self.stableCountDelay = stableCountDelay
+        self.liftGap = liftGap
     }
 
     mutating func update(
         frame: WorkspaceGestureFrame,
+        source: WorkspaceGestureSource = .camera,
         at timestamp: TimeInterval
     ) -> WorkspaceGestureAction? {
         guard !frame.isPinching, let palmCenter = frame.palmCenter else {
-            resetPose()
+            resetPose(source: source)
             return nil
         }
-        guard frame.extendedFingerCount == 4 else {
-            resetPose()
+        guard let rawFingerCount = frame.extendedFingerCount,
+              rawFingerCount >= 4 else {
+            resetPose(source: source)
+            return nil
+        }
+        if sequenceTriggered.contains(source),
+           timestamp - lastRelevantTime[source, default: -Double.infinity] >= liftGap {
+            sequenceTriggered.remove(source)
+            resetPose(source: source)
+        }
+        lastRelevantTime[source] = timestamp
+        guard !sequenceTriggered.contains(source) else { return nil }
+        let fingerCount = min(rawFingerCount, 5)
+        if fingerCount == 5 {
+            suppressFourUntil[source] = timestamp + 0.5
+        } else if timestamp < suppressFourUntil[source, default: -Double.infinity] {
+            resetPose(source: source)
             return nil
         }
 
-        if !isActive {
-            isActive = true
-            startPoint = palmCenter
-            didTrigger = false
+        var state = states[source] ?? PoseState()
+        if !state.isActive || state.fingerCount != fingerCount {
+            state.isActive = true
+            state.startPoint = palmCenter
+            state.didTrigger = false
+            state.fingerCount = fingerCount
+            state.stableSince = timestamp
+            states[source] = state
             return nil
         }
 
-        guard !didTrigger,
+        guard !state.didTrigger,
+              timestamp - state.stableSince >= stableCountDelay,
               timestamp - lastTriggerTime >= cooldown,
-              let startPoint else {
+              let startPoint = state.startPoint else {
             return nil
         }
 
         let deltaX = palmCenter.x - startPoint.x
+        let deltaY = palmCenter.y - startPoint.y
         let action: WorkspaceGestureAction?
 
-        if abs(deltaX) >= swipeThreshold {
+        if fingerCount == 4,
+           abs(deltaX) >= swipeThreshold,
+           abs(deltaX) > abs(deltaY) {
             action = deltaX > 0 ? .switchDesktopLeft : .switchDesktopRight
+        } else if fingerCount == 5,
+                  deltaY >= swipeThreshold,
+                  abs(deltaY) > abs(deltaX) {
+            action = .missionControl
         } else {
             action = nil
         }
 
         if action != nil {
-            didTrigger = true
+            state.didTrigger = true
+            states[source] = state
+            sequenceTriggered.insert(source)
             lastTriggerTime = timestamp
         }
         return action
     }
 
     mutating func reset() {
-        resetPose()
+        states = [:]
+        suppressFourUntil = [:]
+        sequenceTriggered = []
+        lastRelevantTime = [:]
         lastTriggerTime = -Double.infinity
     }
 
-    private mutating func resetPose() {
-        isActive = false
-        startPoint = nil
-        didTrigger = false
+    private mutating func resetPose(source: WorkspaceGestureSource) {
+        states[source] = nil
     }
 }

@@ -67,6 +67,21 @@ final class GestureEngine {
         overlayPresenter.hide()
     }
 
+    func handleTrackpadFrame(
+        _ frame: WorkspaceGestureFrame,
+        at timestamp: TimeInterval
+    ) {
+        guard let action = workspaceGestureDetector.update(
+            frame: frame,
+            source: .trackpad,
+            at: timestamp
+        ) else {
+            return
+        }
+        windowControlService.perform(action)
+        print("[TRACKPAD] action=\(statusText(for: action))")
+    }
+
     private func handle(_ snapshot: HandTrackingSnapshot) {
         let timestamp = ProcessInfo.processInfo.systemUptime
         updateGestureDebugAttempt(with: snapshot)
@@ -113,6 +128,7 @@ final class GestureEngine {
                     palmCenter: screenNormalized(pose.palmCenter),
                     isPinching: false
                 ),
+                source: .camera,
                 at: timestamp
             ) {
                 windowControlService.perform(action)
@@ -132,6 +148,7 @@ final class GestureEngine {
                 palmCenter: screenNormalized(pose.palmCenter),
                 isPinching: true
             ),
+            source: .camera,
             at: timestamp
         )
         overlayPresenter.model.gesturePoint = nil
@@ -480,6 +497,9 @@ final class GestureEngine {
         if fingerCount == 4 {
             return "4 นิ้ว: เลื่อนซ้าย/ขวา"
         }
+        if fingerCount == 5 {
+            return "5 นิ้ว: ปัดขึ้นเพื่อ Mission Control"
+        }
         if fingerCount == 3 {
             return "3 นิ้ว: ไม่มีคำสั่ง"
         }
@@ -499,6 +519,8 @@ final class GestureEngine {
             "Desktop ก่อนหน้า"
         case .switchDesktopRight:
             "Desktop ถัดไป"
+        case .missionControl:
+            "Mission Control"
         }
     }
 

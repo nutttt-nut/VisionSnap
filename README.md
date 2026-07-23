@@ -4,7 +4,7 @@ Gesture-based macOS window manager — move, snap, and switch windows with your 
 
 Portfolio / showcase project. The goal is a demo that feels genuinely real-time and natural, not a replacement for keyboard-driven tools like Rectangle.
 
-> **Status:** Phase 1 MVP working and physically verified on the primary display — pinch-to-drag moves real windows end to end (`enteredGRAB → held AX element → non-zero motion → AX set-position OK`). Multi-monitor support and the 9/10 demo-reliability target are **not yet verified**. See [Roadmap](#roadmap).
+> **Status:** Phase 1 MVP and trackpad workspace gestures are physically verified — pinch-to-drag moves real windows end to end, while 4/5-finger trackpad gestures switch Desktops and open Mission Control. Multi-monitor support and the 9/10 demo-reliability target are **not yet verified**. See [Roadmap](#roadmap).
 
 ## Demo
 
@@ -19,6 +19,7 @@ _Recording coming soon._
 - **3×3 snap grid** — while dragging, the screen shows an 8-zone grid (the eight outer cells of a 3×3); drop into a zone to snap the window there.
 - **Gaze-guided selection** — face-based gaze estimation highlights the window you're looking at (dwell hit-test with smoothing and a dead-zone). Gaze selection pauses automatically while dragging so it never fights the hand.
 - **Workspace gestures** — a four-finger horizontal swipe switches Desktops; a five-finger upward swipe opens Mission Control (mapped to the system `Control+Arrow` shortcuts).
+- **Optional trackpad input** — the same 4/5-finger workspace gestures work on the built-in trackpad without turning the camera on.
 - **Safety net** — make a fist while dragging to cancel and return the window to its original spot; `Escape` is a universal cancel. A confidence floor and hold-time debounce guard against false pinches in poor lighting.
 - **Camera Monitor** — a live view of the tracked hand landmarks and pinch diagnostics, useful for tuning and for understanding what the model sees.
 
@@ -41,6 +42,11 @@ GestureEngine ── confidence threshold + hold-time debounce
               │
               ▼
 WindowControlService (AXUIElement — moves/resizes real windows)
+
+MultitouchSupport (optional trackpad mode)
+      │
+      ▼
+TrackpadInputService ─────► shared WorkspaceGestureDetector
 
 Supporting features:
   MenuBarController        — camera toggle + status indicator
@@ -82,12 +88,14 @@ Honesty about scope is part of the portfolio:
 - **Finger occlusion** can drop tracking — there's no IR/depth sensor to recover it.
 - **Clamshell mode is unsupported** (no camera when the lid is closed).
 - Desktop / Mission Control gestures rely on the macOS `Control+Arrow` shortcuts being enabled.
+- Trackpad mode uses Apple's undocumented `MultitouchSupport` private framework. It may break on a future macOS release and may affect notarization eligibility.
+- Trackpad mode is opt-in. While enabled, VisionSnap temporarily disables macOS's native 4-finger horizontal swipe to prevent double actions, then restores the user's original value when disabled, quit, or recovered after a crash.
 
 ## Roadmap
 
-- **Phase 0 — Foundation:** onboarding, menu-bar toggle, conflict detection _(implemented; evidence/checklist being finalized)_
-- **Phase 1 — MVP:** hand tracking, pinch-drag, snap, workspace gestures, cancel safety net _(working; physically verified on primary display)_
-- **Phase 2:** two-hand resize, cursor smoothing, per-user calibration
+- **Phase 0 — Foundation:** onboarding, menu-bar toggle, conflict detection _(complete)_
+- **Phase 1 — MVP:** hand tracking, pinch-drag, snap, workspace gestures, settings, camera auto-off _(complete; physically verified on primary display)_
+- **Phase 2:** trackpad workspace input _(complete)_; two-hand resize, cursor smoothing, per-user calibration
 - **Phase 3:** workspace presets, custom layouts, physics animations
 
 ## License

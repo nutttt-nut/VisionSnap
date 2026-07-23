@@ -118,6 +118,8 @@ final class WindowControlService {
             keyCode = 123
         case .switchDesktopRight:
             keyCode = 124
+        case .missionControl:
+            keyCode = 126
         }
 
         guard let source = CGEventSource(stateID: .hidSystemState),

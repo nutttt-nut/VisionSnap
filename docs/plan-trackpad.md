@@ -2,6 +2,16 @@
 
 > Feature addition สำหรับ workspace gestures ผ่าน Magic Trackpad / built-in trackpad — เป็น **input mode ที่ 2 คู่กับกล้อง** (ยืนยันกับ Nut 2026-07-23) ใช้ gesture vocabulary เดียวกัน: 4 นิ้วปัดแนวนอน = สลับ Desktop, 5 นิ้วปัดขึ้น = Mission Control
 
+## สถานะ — IMPLEMENTED + PHYSICALLY VERIFIED (2026-07-23)
+
+- `TrackpadInputService` โหลด `MultitouchSupport` แบบ dynamic และป้อน raw centroid frames เข้า `WorkspaceGestureDetector` เดิม
+- 4 นิ้วซ้าย/ขวาและ 5 นิ้วขึ้นผ่าน physical action log; one-shot-per-lift รองรับ contact flicker `6→5→4`
+- cooldown เป็น shared action gate ระหว่าง camera/trackpad
+- onboarding/settings เป็น opt-in consent ก่อนแตะ native setting
+- live-apply gate ผ่าน: เขียน `2→0` แล้ว native 4-finger หยุดทันที; คืน `0→2` แล้ว Space switching กลับมาทันที
+- crash gate ผ่าน: `kill -9` ทิ้งค่า `0` + marker; launch ถัดไป restore original `2`, ลบ marker และปิด trackpad mode
+- SIGTERM/SIGINT และ normal quit restore ค่าเดิมโดยไม่ hardcode
+
 ## เป้าหมาย
 
 - เพิ่ม trackpad เป็นแหล่ง input ที่สองสำหรับ **workspace gestures เท่านั้น** (ไม่รวม pinch-drag ซึ่งยังเป็นของกล้อง)
@@ -49,10 +59,10 @@ system shortcut (Control+Arrow / Control+Up)
 
 ### 🚦 Verification gate (Oasis ต้องพิสูจน์ก่อน ship option d — ห้าม assume)
 
-option (d) พึ่งสมมติฐาน 2 ข้อที่ **ยังไม่ verified** — ถ้าข้อ 1 fail ต้อง fall back ไป (a) อัตโนมัติ ไม่ใช่ปล่อย native ปิดค้าง:
+option (d) ผ่าน verification gates ทั้ง 2 ข้อบนเครื่อง dev แล้ว:
 
-1. 🟡 **Live-apply ได้จริงไหม (ไม่ต้อง logout)?** — `defaults write` เขียนค่าได้แน่ แต่ trackpad driver อาจอ่านค่าตอน login เท่านั้น. Oasis ต้องทดสอบบนเครื่องจริง: เขียนค่า → ปัด 4 นิ้วทันที → native หยุดตอบสนองจริงหรือไม่ (อาจต้อง trigger `distributed notification` เช่น `com.apple.MultitouchSupport...` หรือ re-post ให้ driver reload). **ถ้า live-apply ไม่ได้ → option (d) ใช้ไม่ได้ → fall back (a):** surface ให้ผู้ใช้ปิดเองผ่าน ConflictDetector เดิม
-2. 🟡 **Crash-safe restore** — ถ้า VisionSnap crash / force-quit / power loss จะไม่ทัน restore → ผู้ใช้เหลือ native ปิดค้าง (regression เงียบ). ต้องมี: (i) restore-on-next-launch — เช็ค marker file ตอน launch ถ้าเจอค่าเดิมที่ยังไม่ restore ให้คืนก่อน, (ii) signal handler (SIGTERM/SIGINT) restore ก่อนตาย
+1. ✅ **Live-apply** — ไม่ต้อง logout และไม่ต้องส่ง distributed notification เพิ่ม
+2. ✅ **Crash-safe restore** — marker restore-on-next-launch + SIGTERM/SIGINT handler ผ่าน; `kill -9` physical gate ผ่าน
 
 **Consent (repo public):** อย่าเปลี่ยน system setting เงียบๆ — onboarding ต้องบอกผู้ใช้ครั้งแรกว่า "VisionSnap จะปิด native 4-finger swipe ชั่วคราวตอนเปิด และคืนค่าให้ตอนปิด" (ใช้ ConflictDetector/onboarding pattern เดิม)
 
