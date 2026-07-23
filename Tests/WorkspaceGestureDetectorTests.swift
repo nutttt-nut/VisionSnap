@@ -7,17 +7,15 @@ struct WorkspaceGestureDetectorTests {
         expect(
             HandInteractionModeResolver.resolve(
                 fingerCount: 5,
-                isIndexPointing: false,
                 phase: .open,
                 isDragging: false,
                 isFist: false
-            ) == .workspace,
-            "five fingers must not control the mouse"
+            ) == .inactive,
+            "open hand must stay inactive while Mission Control is disabled"
         )
         expect(
             HandInteractionModeResolver.resolve(
                 fingerCount: 4,
-                isIndexPointing: false,
                 phase: .open,
                 isDragging: false,
                 isFist: false
@@ -27,17 +25,15 @@ struct WorkspaceGestureDetectorTests {
         expect(
             HandInteractionModeResolver.resolve(
                 fingerCount: 1,
-                isIndexPointing: true,
                 phase: .open,
                 isDragging: false,
                 isFist: false
-            ) == .pointer,
-            "one finger must control the pointer"
+            ) == .inactive,
+            "hand must not control the pointer before pinching"
         )
         expect(
             HandInteractionModeResolver.resolve(
                 fingerCount: 3,
-                isIndexPointing: false,
                 phase: .open,
                 isDragging: false,
                 isFist: false
@@ -47,7 +43,6 @@ struct WorkspaceGestureDetectorTests {
         expect(
             HandInteractionModeResolver.resolve(
                 fingerCount: 0,
-                isIndexPointing: false,
                 phase: .pinching,
                 isDragging: false,
                 isFist: true
@@ -57,7 +52,6 @@ struct WorkspaceGestureDetectorTests {
         expect(
             HandInteractionModeResolver.resolve(
                 fingerCount: 0,
-                isIndexPointing: false,
                 phase: .candidate(progress: 0.5),
                 isDragging: false,
                 isFist: true
@@ -88,6 +82,37 @@ struct WorkspaceGestureDetectorTests {
             "points outside the active region must clamp to screen edges"
         )
 
+        let snapEngine = SnapEngine()
+        let screenFrame = CGRect(x: 0, y: 0, width: 1200, height: 800)
+        let visibleFrame = CGRect(x: 0, y: 24, width: 1200, height: 776)
+        expect(snapEngine.target(at: CGPoint(x: 20, y: 400), in: screenFrame) == .leftHalf)
+        expect(snapEngine.target(at: CGPoint(x: 1180, y: 400), in: screenFrame) == .rightHalf)
+        expect(snapEngine.target(at: CGPoint(x: 20, y: 20), in: screenFrame) == .topLeft)
+        expect(snapEngine.target(at: CGPoint(x: 1180, y: 20), in: screenFrame) == .topRight)
+        expect(snapEngine.target(at: CGPoint(x: 20, y: 780), in: screenFrame) == .bottomLeft)
+        expect(snapEngine.target(at: CGPoint(x: 1180, y: 780), in: screenFrame) == .bottomRight)
+        expect(snapEngine.target(at: CGPoint(x: 600, y: 780), in: screenFrame) == .bottomHalf)
+        expect(snapEngine.target(at: CGPoint(x: 600, y: 20), in: screenFrame) == .fullScreen)
+        expect(snapEngine.target(at: CGPoint(x: 600, y: 400), in: screenFrame) == nil)
+        expect(
+            snapEngine.frame(for: .leftHalf, in: visibleFrame)
+                == CGRect(x: 0, y: 24, width: 600, height: 776)
+        )
+        expect(
+            snapEngine.frame(for: .rightHalf, in: visibleFrame)
+                == CGRect(x: 600, y: 24, width: 600, height: 776)
+        )
+        expect(snapEngine.frame(for: .fullScreen, in: visibleFrame) == visibleFrame)
+        expect(
+            snapEngine.frame(for: .topLeft, in: visibleFrame)
+                == CGRect(x: 0, y: 24, width: 600, height: 388)
+        )
+        expect(
+            snapEngine.frame(for: .bottomRight, in: visibleFrame)
+                == CGRect(x: 600, y: 412, width: 600, height: 388)
+        )
+        expect(snapEngine.gridFrames(in: visibleFrame).count == 8)
+
         var detector = WorkspaceGestureDetector()
 
         expect(detector.update(frame: frame(4, x: 0.4, y: 0.5), at: 0) == nil)
@@ -105,13 +130,6 @@ struct WorkspaceGestureDetectorTests {
         expect(
             detector.update(frame: frame(4, x: 0.4, y: 0.5), at: 1.3) == .switchDesktopRight,
             "four-finger left swipe must switch right"
-        )
-
-        _ = detector.update(frame: frame(3, x: 0.5, y: 0.5), at: 2.0)
-        _ = detector.update(frame: frame(5, x: 0.5, y: 0.6), at: 2.1)
-        expect(
-            detector.update(frame: frame(5, x: 0.5, y: 0.4), at: 2.3) == .missionControl,
-            "five-finger upward swipe must open Mission Control"
         )
 
         _ = detector.update(frame: frame(3, x: 0.5, y: 0.5), at: 3.0)

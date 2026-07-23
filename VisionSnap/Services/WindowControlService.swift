@@ -23,6 +23,7 @@ final class WindowControlService {
     private var dragSession: DragSession?
 
     var isDragging: Bool { dragSession != nil }
+    private(set) var lastAXElementDescription: String?
 
     func window(at point: CGPoint) -> TargetWindow? {
         guard let windows = CGWindowListCopyWindowInfo(
@@ -57,9 +58,11 @@ final class WindowControlService {
     }
 
     func beginDrag(target: TargetWindow, cursor: CGPoint) -> Bool {
+        lastAXElementDescription = nil
         guard AXIsProcessTrusted(), let window = accessibilityWindow(for: target) else {
             return false
         }
+        lastAXElementDescription = "\(target.processIdentifier):\(target.title.isEmpty ? target.appName : target.title)"
 
         let originalPosition = position(of: window) ?? target.frame.origin
         dragSession = DragSession(
@@ -73,22 +76,26 @@ final class WindowControlService {
         return true
     }
 
-    func updateDrag(cursor: CGPoint) {
-        guard let dragSession else { return }
+    func updateDrag(cursor: CGPoint) -> AXError? {
+        guard let dragSession else { return nil }
         var position = CGPoint(
             x: cursor.x - dragSession.grabOffset.x,
             y: cursor.y - dragSession.grabOffset.y
         )
-        guard let value = AXValueCreate(.cgPoint, &position) else { return }
-        AXUIElementSetAttributeValue(
+        guard let value = AXValueCreate(.cgPoint, &position) else { return .failure }
+        return AXUIElementSetAttributeValue(
             dragSession.window,
             kAXPositionAttribute as CFString,
             value
         )
     }
 
-    func endDrag() {
-        dragSession = nil
+    @discardableResult
+    func endDrag(snappingTo frame: CGRect? = nil) -> Bool {
+        guard let dragSession else { return false }
+        defer { self.dragSession = nil }
+        guard let frame else { return true }
+        return setFrame(frame, on: dragSession.window)
     }
 
     func cancelDrag() {
@@ -111,8 +118,6 @@ final class WindowControlService {
             keyCode = 123
         case .switchDesktopRight:
             keyCode = 124
-        case .missionControl:
-            keyCode = 126
         }
 
         guard let source = CGEventSource(stateID: .hidSystemState),
@@ -124,6 +129,33 @@ final class WindowControlService {
         keyUp.flags = .maskControl
         keyDown.post(tap: .cghidEventTap)
         keyUp.post(tap: .cghidEventTap)
+    }
+
+    func setFrame(_ frame: CGRect, for target: TargetWindow) -> Bool {
+        guard AXIsProcessTrusted(), let window = accessibilityWindow(for: target) else {
+            return false
+        }
+        return setFrame(frame, on: window)
+    }
+
+    private func setFrame(_ frame: CGRect, on window: AXUIElement) -> Bool {
+        var position = frame.origin
+        var size = frame.size
+        guard let positionValue = AXValueCreate(.cgPoint, &position),
+              let sizeValue = AXValueCreate(.cgSize, &size) else {
+            return false
+        }
+        let positionResult = AXUIElementSetAttributeValue(
+            window,
+            kAXPositionAttribute as CFString,
+            positionValue
+        )
+        let sizeResult = AXUIElementSetAttributeValue(
+            window,
+            kAXSizeAttribute as CFString,
+            sizeValue
+        )
+        return positionResult == .success && sizeResult == .success
     }
 
     private func accessibilityWindow(for target: TargetWindow) -> AXUIElement? {

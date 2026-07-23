@@ -80,6 +80,12 @@ private struct CameraMonitorView: View {
                         Text("Mode: \(interactionModeText)")
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                        Text("Accessibility: \(AXIsProcessTrusted() ? "Granted" : "Missing")")
+                            .font(.caption)
+                            .foregroundStyle(AXIsProcessTrusted() ? Color.secondary : Color.red)
+                        Text("Gaze: \(gazeText)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
 
                     Spacer()
@@ -130,7 +136,6 @@ private struct CameraMonitorView: View {
         let pose = HandPoseAnalyzer.analyze(points)
         switch HandInteractionModeResolver.resolve(
             fingerCount: pose.extendedFingerCount,
-            isIndexPointing: pose.isIndexPointing,
             phase: handTrackingService.snapshot.phase,
             isDragging: false,
             isFist: pose.isFist
@@ -146,5 +151,12 @@ private struct CameraMonitorView: View {
 
     private var detectionColor: Color {
         handTrackingService.snapshot.phase == .pinching ? .green : .secondary
+    }
+
+    private var gazeText: String {
+        guard let point = handTrackingService.snapshot.gazePoint else {
+            return "Not detected"
+        }
+        return String(format: "x %.2f · y %.2f", point.x, point.y)
     }
 }

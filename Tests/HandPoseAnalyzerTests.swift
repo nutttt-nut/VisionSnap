@@ -33,6 +33,40 @@ struct HandPoseAnalyzerTests {
         )
         expect(HandPoseAnalyzer.analyze(fist).isFist, "folded fingers must report fist")
 
+        let eye = [
+            CGPoint(x: 0.2, y: 0.45),
+            CGPoint(x: 0.4, y: 0.45),
+            CGPoint(x: 0.4, y: 0.55),
+            CGPoint(x: 0.2, y: 0.55),
+        ]
+        let centeredSignal = GazeEstimator.signal(
+            leftEye: eye,
+            leftPupil: CGPoint(x: 0.3, y: 0.5),
+            rightEye: eye,
+            rightPupil: CGPoint(x: 0.3, y: 0.5),
+            yaw: 0,
+            pitch: 0
+        )
+        let rightSignal = GazeEstimator.signal(
+            leftEye: eye,
+            leftPupil: CGPoint(x: 0.34, y: 0.5),
+            rightEye: eye,
+            rightPupil: CGPoint(x: 0.34, y: 0.5),
+            yaw: 0,
+            pitch: 0
+        )
+        expect((rightSignal?.x ?? 0) > (centeredSignal?.x ?? 0), "right pupil movement must change gaze signal")
+
+        var calibrator = GazeCalibrator(requiredSamples: 2, horizontalGain: 2, verticalGain: 2)
+        expect(
+            calibrator.update(signal: CGPoint(x: 0.2, y: -0.1)) == nil,
+            "calibration must wait for enough samples"
+        )
+        let calibratedCenter = calibrator.update(signal: CGPoint(x: 0.2, y: -0.1))
+        expect(pointsEqual(calibratedCenter, CGPoint(x: 0.5, y: 0.5)), "baseline must map to center")
+        let calibratedMove = calibrator.update(signal: CGPoint(x: 0.3, y: 0))
+        expect(pointsEqual(calibratedMove, CGPoint(x: 0.7, y: 0.7)), "gaze delta must map from baseline")
+
         print("HandPoseAnalyzerTests: all checks passed")
     }
 
@@ -62,5 +96,10 @@ struct HandPoseAnalyzerTests {
 
     private static func expect(_ condition: @autoclosure () -> Bool, _ message: String) {
         guard condition() else { fatalError(message) }
+    }
+
+    private static func pointsEqual(_ first: CGPoint?, _ second: CGPoint) -> Bool {
+        guard let first else { return false }
+        return abs(first.x - second.x) < 0.0001 && abs(first.y - second.y) < 0.0001
     }
 }

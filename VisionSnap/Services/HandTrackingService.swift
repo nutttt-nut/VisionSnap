@@ -14,15 +14,27 @@ struct HandLandmark: Identifiable {
 struct HandTrackingSnapshot {
     let landmarks: [HandLandmark]
     let phase: PinchPhase
+    let gazePoint: CGPoint?
+    let pinchConfidence: Float
+    let pinchHoldMilliseconds: Int
 
-    static let empty = HandTrackingSnapshot(landmarks: [], phase: .noHand)
+    static let empty = HandTrackingSnapshot(
+        landmarks: [],
+        phase: .noHand,
+        gazePoint: nil,
+        pinchConfidence: 0,
+        pinchHoldMilliseconds: 0
+    )
 }
 
 final class HandTrackingService: NSObject, ObservableObject {
     @Published private(set) var snapshot = HandTrackingSnapshot.empty
 
     private let request: VNDetectHumanHandPoseRequest
+    private let faceRequest = VNDetectFaceLandmarksRequest()
     private var pinchDetector = PinchDetector()
+    private var gazeCalibrator = GazeCalibrator()
+    private var gazePausedUntil = -Double.infinity
 
     override init() {
         request = VNDetectHumanHandPoseRequest()
@@ -32,12 +44,16 @@ final class HandTrackingService: NSObject, ObservableObject {
 
     func reset() {
         pinchDetector.reset()
+        gazeCalibrator.reset()
+        gazePausedUntil = -Double.infinity
         DispatchQueue.main.async { [weak self] in
             self?.snapshot = .empty
         }
     }
 
     private func process(_ sampleBuffer: CMSampleBuffer) {
+        let timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer).seconds
+        let shouldTrackGaze = timestamp >= gazePausedUntil
         let handler = VNImageRequestHandler(
             cmSampleBuffer: sampleBuffer,
             orientation: .up,
@@ -45,21 +61,24 @@ final class HandTrackingService: NSObject, ObservableObject {
         )
 
         do {
-            try handler.perform([request])
+            let requests: [VNRequest] = shouldTrackGaze ? [request, faceRequest] : [request]
+            try handler.perform(requests)
+            var gazePoint = shouldTrackGaze ? gazePoint(from: faceRequest.results?.first) : nil
             guard let observation = request.results?.first else {
                 publish(landmarks: [], phase: pinchDetector.update(
                     thumbTip: nil,
                     thumbConfidence: 0,
                     indexTip: nil,
                     indexConfidence: 0,
-                    at: CMSampleBufferGetPresentationTimeStamp(sampleBuffer).seconds
-                ))
+                    handScale: nil,
+                    at: timestamp
+                ), gazePoint: gazePoint)
                 return
             }
 
             let points = try observation.recognizedPoints(.all)
             let landmarks = trackedJointNames.compactMap { name -> HandLandmark? in
-                guard let point = points[name], point.confidence >= 0.6 else {
+                guard let point = points[name], point.confidence >= 0.4 else {
                     return nil
                 }
                 return HandLandmark(
@@ -71,22 +90,69 @@ final class HandTrackingService: NSObject, ObservableObject {
 
             let thumbTip = points[.thumbTip]
             let indexTip = points[.indexTip]
+            let handScale: CGFloat? = {
+                guard let wrist = points[.wrist]?.location,
+                      let middleMCP = points[.middleMCP]?.location else { return nil }
+                return hypot(middleMCP.x - wrist.x, middleMCP.y - wrist.y)
+            }()
             let phase = pinchDetector.update(
                 thumbTip: thumbTip?.location,
                 thumbConfidence: thumbTip?.confidence ?? 0,
                 indexTip: indexTip?.location,
                 indexConfidence: indexTip?.confidence ?? 0,
-                at: CMSampleBufferGetPresentationTimeStamp(sampleBuffer).seconds
+                handScale: handScale,
+                at: timestamp
             )
-            publish(landmarks: landmarks, phase: phase)
+            if phase == .pinching || isCandidate(phase) {
+                gazePausedUntil = timestamp + 0.7
+                gazePoint = nil
+            }
+            publish(landmarks: landmarks, phase: phase, gazePoint: gazePoint)
         } catch {
             pinchDetector.reset()
-            publish(landmarks: [], phase: .noHand)
+            publish(landmarks: [], phase: .noHand, gazePoint: nil)
         }
     }
 
-    private func publish(landmarks: [HandLandmark], phase: PinchPhase) {
-        let nextSnapshot = HandTrackingSnapshot(landmarks: landmarks, phase: phase)
+    private func isCandidate(_ phase: PinchPhase) -> Bool {
+        if case .candidate = phase { return true }
+        return false
+    }
+
+    private func gazePoint(from observation: VNFaceObservation?) -> CGPoint? {
+        guard let observation,
+              let landmarks = observation.landmarks,
+              let leftEye = landmarks.leftEye?.normalizedPoints,
+              let rightEye = landmarks.rightEye?.normalizedPoints,
+              let leftPupil = landmarks.leftPupil?.normalizedPoints.first,
+              let rightPupil = landmarks.rightPupil?.normalizedPoints.first else {
+            return nil
+        }
+        guard let signal = GazeEstimator.signal(
+            leftEye: leftEye,
+            leftPupil: leftPupil,
+            rightEye: rightEye,
+            rightPupil: rightPupil,
+            yaw: CGFloat(truncating: observation.yaw ?? 0),
+            pitch: CGFloat(truncating: observation.pitch ?? 0)
+        ) else {
+            return nil
+        }
+        return gazeCalibrator.update(signal: signal)
+    }
+
+    private func publish(
+        landmarks: [HandLandmark],
+        phase: PinchPhase,
+        gazePoint: CGPoint?
+    ) {
+        let nextSnapshot = HandTrackingSnapshot(
+            landmarks: landmarks,
+            phase: phase,
+            gazePoint: gazePoint,
+            pinchConfidence: pinchDetector.diagnosticConfidence,
+            pinchHoldMilliseconds: pinchDetector.diagnosticHoldMilliseconds
+        )
         DispatchQueue.main.async { [weak self] in
             self?.snapshot = nextSnapshot
         }

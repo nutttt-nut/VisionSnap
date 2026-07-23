@@ -4,7 +4,6 @@ import Foundation
 enum WorkspaceGestureAction: Equatable {
     case switchDesktopLeft
     case switchDesktopRight
-    case missionControl
 }
 
 enum HandInteractionMode: Equatable {
@@ -25,10 +24,95 @@ enum PointerMapper {
     }
 }
 
+enum SnapTarget: Equatable {
+    case leftHalf
+    case rightHalf
+    case topLeft
+    case topRight
+    case bottomLeft
+    case bottomRight
+    case bottomHalf
+    case fullScreen
+}
+
+struct SnapEngine {
+    func target(at cursor: CGPoint, in screenFrame: CGRect) -> SnapTarget? {
+        guard screenFrame.contains(cursor) else { return nil }
+        let column = min(Int((cursor.x - screenFrame.minX) / (screenFrame.width / 3)), 2)
+        let row = min(Int((cursor.y - screenFrame.minY) / (screenFrame.height / 3)), 2)
+        let targets: [[SnapTarget?]] = [
+            [.topLeft, .fullScreen, .topRight],
+            [.leftHalf, nil, .rightHalf],
+            [.bottomLeft, .bottomHalf, .bottomRight],
+        ]
+        return targets[row][column]
+    }
+
+    func frame(for target: SnapTarget, in visibleFrame: CGRect) -> CGRect {
+        switch target {
+        case .leftHalf:
+            return CGRect(
+                x: visibleFrame.minX,
+                y: visibleFrame.minY,
+                width: visibleFrame.width / 2,
+                height: visibleFrame.height
+            )
+        case .rightHalf:
+            return CGRect(
+                x: visibleFrame.midX,
+                y: visibleFrame.minY,
+                width: visibleFrame.width / 2,
+                height: visibleFrame.height
+            )
+        case .topLeft:
+            return quarter(in: visibleFrame, right: false, bottom: false)
+        case .topRight:
+            return quarter(in: visibleFrame, right: true, bottom: false)
+        case .bottomLeft:
+            return quarter(in: visibleFrame, right: false, bottom: true)
+        case .bottomRight:
+            return quarter(in: visibleFrame, right: true, bottom: true)
+        case .bottomHalf:
+            return CGRect(
+                x: visibleFrame.minX,
+                y: visibleFrame.midY,
+                width: visibleFrame.width,
+                height: visibleFrame.height / 2
+            )
+        case .fullScreen:
+            return visibleFrame
+        }
+    }
+
+    func gridFrames(in visibleFrame: CGRect) -> [CGRect] {
+        let cellWidth = visibleFrame.width / 3
+        let cellHeight = visibleFrame.height / 3
+        return (0..<3).flatMap { row in
+            (0..<3).compactMap { column in
+                guard row != 1 || column != 1 else { return nil }
+                return CGRect(
+                    x: visibleFrame.minX + CGFloat(column) * cellWidth,
+                    y: visibleFrame.minY + CGFloat(row) * cellHeight,
+                    width: cellWidth,
+                    height: cellHeight
+                )
+            }
+        }
+    }
+
+    private func quarter(in frame: CGRect, right: Bool, bottom: Bool) -> CGRect {
+        CGRect(
+            x: right ? frame.midX : frame.minX,
+            y: bottom ? frame.midY : frame.minY,
+            width: frame.width / 2,
+            height: frame.height / 2
+        )
+    }
+}
+
 enum HandInteractionModeResolver {
     static func resolve(
         fingerCount: Int?,
-        isIndexPointing: Bool,
         phase: PinchPhase,
         isDragging: Bool,
         isFist: Bool
@@ -40,12 +124,7 @@ enum HandInteractionModeResolver {
             return .pointer
         }
         if isFist { return .inactive }
-        switch fingerCount {
-        case 4, 5:
-            return .workspace
-        default:
-            return isIndexPointing ? .pointer : .inactive
-        }
+        return fingerCount == 4 ? .workspace : .inactive
     }
 }
 
@@ -59,12 +138,12 @@ struct WorkspaceGestureDetector {
     let swipeThreshold: CGFloat
     let cooldown: TimeInterval
 
-    private var activeFingerCount: Int?
+    private var isActive = false
     private var startPoint: CGPoint?
     private var didTrigger = false
     private var lastTriggerTime = -Double.infinity
 
-    init(swipeThreshold: CGFloat = 0.18, cooldown: TimeInterval = 0.8) {
+    init(swipeThreshold: CGFloat = 0.10, cooldown: TimeInterval = 0.8) {
         self.swipeThreshold = swipeThreshold
         self.cooldown = cooldown
     }
@@ -73,16 +152,17 @@ struct WorkspaceGestureDetector {
         frame: WorkspaceGestureFrame,
         at timestamp: TimeInterval
     ) -> WorkspaceGestureAction? {
-        guard !frame.isPinching,
-              let fingerCount = frame.extendedFingerCount,
-              let palmCenter = frame.palmCenter,
-              fingerCount == 4 || fingerCount == 5 else {
+        guard !frame.isPinching, let palmCenter = frame.palmCenter else {
+            resetPose()
+            return nil
+        }
+        guard frame.extendedFingerCount == 4 else {
             resetPose()
             return nil
         }
 
-        if activeFingerCount != fingerCount {
-            activeFingerCount = fingerCount
+        if !isActive {
+            isActive = true
             startPoint = palmCenter
             didTrigger = false
             return nil
@@ -95,13 +175,10 @@ struct WorkspaceGestureDetector {
         }
 
         let deltaX = palmCenter.x - startPoint.x
-        let deltaY = palmCenter.y - startPoint.y
         let action: WorkspaceGestureAction?
 
-        if fingerCount == 4, abs(deltaX) >= swipeThreshold {
+        if abs(deltaX) >= swipeThreshold {
             action = deltaX > 0 ? .switchDesktopLeft : .switchDesktopRight
-        } else if fingerCount == 5, deltaY <= -swipeThreshold {
-            action = .missionControl
         } else {
             action = nil
         }
@@ -119,7 +196,7 @@ struct WorkspaceGestureDetector {
     }
 
     private mutating func resetPose() {
-        activeFingerCount = nil
+        isActive = false
         startPoint = nil
         didTrigger = false
     }

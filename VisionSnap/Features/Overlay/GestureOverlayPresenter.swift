@@ -4,8 +4,12 @@ import SwiftUI
 @MainActor
 final class GestureOverlayModel: ObservableObject {
     @Published var cursorPoint: CGPoint?
+    @Published var gazePoint: CGPoint?
     @Published var gesturePoint: CGPoint?
     @Published var selectedWindow: TargetWindow?
+    @Published var snapPreviewFrame: CGRect?
+    @Published var snapGridFrames: [CGRect] = []
+    @Published var isGrabbing = false
     @Published var statusText: String?
 }
 
@@ -27,9 +31,18 @@ final class GestureOverlayPresenter {
         panel.isOpaque = false
         panel.hasShadow = false
         panel.ignoresMouseEvents = true
-        panel.level = .floating
-        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-        panel.contentView = NSHostingView(rootView: GestureOverlayView(model: model))
+        panel.hidesOnDeactivate = false
+        panel.becomesKeyOnlyIfNeeded = true
+        panel.level = .popUpMenu
+        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary, .ignoresCycle]
+        let hostingView = NSHostingView(rootView: GestureOverlayView(model: model))
+        hostingView.frame = CGRect(origin: .zero, size: screen.frame.size)
+        hostingView.autoresizingMask = [.width, .height]
+        panel.contentView = hostingView
+        panel.setContentSize(screen.frame.size)
+        panel.setFrameOrigin(screen.frame.origin)
+        panel.contentMinSize = screen.frame.size
+        panel.contentMaxSize = screen.frame.size
         panel.orderFrontRegardless()
         window = panel
     }
@@ -38,8 +51,12 @@ final class GestureOverlayPresenter {
         window?.orderOut(nil)
         window = nil
         model.cursorPoint = nil
+        model.gazePoint = nil
         model.gesturePoint = nil
         model.selectedWindow = nil
+        model.snapPreviewFrame = nil
+        model.snapGridFrames = []
+        model.isGrabbing = false
         model.statusText = nil
     }
 }
@@ -49,7 +66,26 @@ private struct GestureOverlayView: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            if let window = model.selectedWindow {
+            ForEach(Array(model.snapGridFrames.enumerated()), id: \.offset) { _, frame in
+                Rectangle()
+                    .stroke(.cyan.opacity(0.45), lineWidth: 2)
+                    .background(.cyan.opacity(0.04))
+                    .frame(width: frame.width, height: frame.height)
+                    .position(x: frame.midX, y: frame.midY)
+            }
+
+            if let frame = model.snapPreviewFrame {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(.cyan.opacity(0.18))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(.cyan, lineWidth: 4)
+                    )
+                    .frame(width: frame.width, height: frame.height)
+                    .position(x: frame.midX, y: frame.midY)
+            }
+
+            if let window = model.selectedWindow, !model.isGrabbing {
                 RoundedRectangle(cornerRadius: 8)
                     .stroke(.yellow, lineWidth: 4)
                     .frame(width: window.frame.width, height: window.frame.height)
@@ -69,10 +105,32 @@ private struct GestureOverlayView: View {
 
             if let cursor = model.cursorPoint {
                 Circle()
-                    .stroke(.cyan, lineWidth: 4)
-                    .background(Circle().fill(.black.opacity(0.35)))
-                    .frame(width: 30, height: 30)
+                    .fill(model.isGrabbing ? .green : .black.opacity(0.35))
+                    .overlay(
+                        Circle().stroke(model.isGrabbing ? .white : .cyan, lineWidth: 4)
+                    )
+                    .frame(width: model.isGrabbing ? 40 : 30, height: model.isGrabbing ? 40 : 30)
                     .position(cursor)
+            }
+
+            if model.isGrabbing {
+                Text("จับอยู่ — ปล่อยนิ้วเพื่อวาง")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 9)
+                    .background(.green.opacity(0.9), in: Capsule())
+                    .frame(maxWidth: .infinity, alignment: .top)
+                    .padding(.top, 24)
+            }
+
+            if let gaze = model.gazePoint {
+                ZStack {
+                    Circle().stroke(.pink, lineWidth: 3)
+                    Circle().fill(.pink).frame(width: 5, height: 5)
+                }
+                .frame(width: 18, height: 18)
+                .position(gaze)
             }
 
             if let gesturePoint = model.gesturePoint {
@@ -86,7 +144,7 @@ private struct GestureOverlayView: View {
             }
 
             if let statusText = model.statusText,
-               let anchor = model.cursorPoint ?? model.gesturePoint {
+               let anchor = model.cursorPoint ?? model.gesturePoint ?? model.gazePoint {
                 Text(statusText)
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(.white)
@@ -96,6 +154,7 @@ private struct GestureOverlayView: View {
                     .position(x: anchor.x + 85, y: anchor.y + 30)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .ignoresSafeArea()
     }
 }

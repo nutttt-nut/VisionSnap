@@ -1,3 +1,4 @@
+import ApplicationServices
 import SwiftUI
 
 @main
@@ -22,6 +23,7 @@ struct VisionSnapApp: App {
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
+        print("[GESTURE] AXIsProcessTrusted=\(AXIsProcessTrusted())")
         let showConflicts = {
             let conflicts = ConflictDetector().detect()
             ConflictWarningPresenter.shared.showIfNeeded(conflicts: conflicts)
