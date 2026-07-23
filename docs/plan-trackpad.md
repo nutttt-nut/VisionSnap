@@ -33,33 +33,46 @@ system shortcut (Control+Arrow / Control+Up)
 - **Permission**: reuse Accessibility grant ที่ VisionSnap มีอยู่แล้ว (Touch-Tab ยืนยันว่า background trackpad ต้องแค่ Accessibility) — Oasis ต้อง verify ว่า MultitouchSupport ไม่ต้อง permission เพิ่มนอกจากนี้
 - **Double-fire guard (camera + trackpad ทำงานพร้อมกัน)**: ถ้าเปิดทั้งสอง input พร้อมกัน ท่า workspace เดียวต้อง trigger action **ครั้งเดียว** — debounce ที่ระดับ action ไม่ใช่ per-source (ใช้ cooldown ร่วมของ WorkspaceGestureDetector)
 
-## 🔴 OPEN DECISION (นัทต้องเลือกก่อน implement) — 4-finger ชน native
+## ✅ RESOLVED (2026-07-23, Nut) — option (d) auto-toggle native
 
 **ปัญหาแกน**: macOS native มี "Swipe between full-screen apps" (4 นิ้ว) เปิด default. MultitouchSupport อ่าน contact แบบ **passive — suppress event ระบบไม่ได้** (ไม่มี stable API ให้ third-party กิน system multi-finger swipe). ผลคือ 4-finger ปัด → **ยิงซ้อน 2 ที**: native switch desktop + VisionSnap Control+arrow = desktop เด้ง 2 ครั้ง
 
-ตัวเลือก (เลือก 1):
-- **(a) ปิด native ก่อนใช้** — ให้ผู้ใช้ปิด "Swipe between full-screen apps" ใน System Settings, surface ผ่าน ConflictDetector/onboarding pattern เดิม (VisionSnap มี ConflictDetector อยู่แล้ว) — ได้ 4+5 finger ครบตามที่ขอ แต่ผู้ใช้ต้องตั้งค่าเอง
-- **(b) 5-finger only** — ทำเฉพาะ 5 นิ้ว (native ไม่ผูก 5-finger = ไม่ชนเลย), ปล่อย 4-finger desktop switch ให้ native ทำไป (ซึ่งมันก็ทำได้ดีอยู่แล้ว). สะอาดสุด, ไม่ต้องแตะ settings ผู้ใช้ แต่ vocabulary ไม่ครบเท่ากล้อง
-- **(c) accept double-fire** — ❌ ไม่เอา (พังชัดเจน)
+**ตัวเลือกที่พิจารณาแล้ว (historical):**
+- (a) ให้ผู้ใช้ปิด native เอง ผ่าน ConflictDetector/onboarding — ได้ 4+5 ครบ แต่ผู้ใช้ต้องตั้งเอง
+- (b) 5-finger only — สะอาดสุด ไม่แตะ settings แต่ vocabulary ไม่ครบ
+- (c) accept double-fire — ❌ ตัดทิ้ง (พังชัดเจน)
 
-> 5-finger half สะอาดในทุกกรณี — native ไม่ผูก 5 นิ้ว. ความยุ่งอยู่ที่ 4-finger เท่านั้น
+**Nut เลือก (d): VisionSnap จัดการ native setting ให้เอง (lifecycle-managed)**
+> ปิด native ตอน VisionSnap **activate**, คืนค่า (restore) ตอน **quit/deactivate** — ผู้ใช้ไม่ต้องแตะ System Settings เอง = UX ดีสุด, ได้ 4+5 finger ครบ, ท่าเดียวยิงครั้งเดียว
 
-### ⚠️ UNRESOLVED (2026-07-23) — ต้อง clarify ก่อน implement
+**Mechanism (Oasis pin ตอน implement):** toggle key ของ "Swipe between full-screen apps" ผ่าน `defaults` domain `com.apple.AppleMultitouchTrackpad` / `com.apple.driver.AppleBluetoothMultitouch.trackpad` (key ตระกูล `...FourFingerHorizSwipeGesture`, ค่า 2=on / 0=off) — บันทึกค่าเดิมก่อนปิด เพื่อ restore ให้ตรงที่ผู้ใช้ตั้งไว้ (ไม่ hardcode คืนเป็น on)
 
-Nut ตอบ "(a) but keep native active" — **ขัดกันเอง**: (a) ทั้งอันคือ *ปิด native* เพื่อเลี่ยง double-fire. ถ้าเก็บ native ไว้ + VisionSnap ทำ 4-finger ด้วย = desktop เด้ง 2 ที (= option c ที่ตัดทิ้งแล้ว). API อ่าน passive suppress native ไม่ได้ → 4-finger + native-on พร้อมกัน **เป็นไปไม่ได้ทางเทคนิค**. ต้องถาม Nut ให้เลือกจริง: (a) ยอมปิด native แลกกับ 4+5 finger ครบ **หรือ** (b) เก็บ native ไว้แล้ว VisionSnap ทำ 5-finger อย่างเดียว. **อย่า implement 4-finger จนกว่าจะ resolve.**
+### 🚦 Verification gate (Oasis ต้องพิสูจน์ก่อน ship option d — ห้าม assume)
+
+option (d) พึ่งสมมติฐาน 2 ข้อที่ **ยังไม่ verified** — ถ้าข้อ 1 fail ต้อง fall back ไป (a) อัตโนมัติ ไม่ใช่ปล่อย native ปิดค้าง:
+
+1. 🟡 **Live-apply ได้จริงไหม (ไม่ต้อง logout)?** — `defaults write` เขียนค่าได้แน่ แต่ trackpad driver อาจอ่านค่าตอน login เท่านั้น. Oasis ต้องทดสอบบนเครื่องจริง: เขียนค่า → ปัด 4 นิ้วทันที → native หยุดตอบสนองจริงหรือไม่ (อาจต้อง trigger `distributed notification` เช่น `com.apple.MultitouchSupport...` หรือ re-post ให้ driver reload). **ถ้า live-apply ไม่ได้ → option (d) ใช้ไม่ได้ → fall back (a):** surface ให้ผู้ใช้ปิดเองผ่าน ConflictDetector เดิม
+2. 🟡 **Crash-safe restore** — ถ้า VisionSnap crash / force-quit / power loss จะไม่ทัน restore → ผู้ใช้เหลือ native ปิดค้าง (regression เงียบ). ต้องมี: (i) restore-on-next-launch — เช็ค marker file ตอน launch ถ้าเจอค่าเดิมที่ยังไม่ restore ให้คืนก่อน, (ii) signal handler (SIGTERM/SIGINT) restore ก่อนตาย
+
+**Consent (repo public):** อย่าเปลี่ยน system setting เงียบๆ — onboarding ต้องบอกผู้ใช้ครั้งแรกว่า "VisionSnap จะปิด native 4-finger swipe ชั่วคราวตอนเปิด และคืนค่าให้ตอนปิด" (ใช้ ConflictDetector/onboarding pattern เดิม)
 
 ## Risks
 
 | ความเสี่ยง | Mitigation |
 |---|---|
 | **Private API (MultitouchSupport undocumented)** | Oasis pin exact API จาก Touch-Tab/BTT source; อาจกระทบ notarization → เขียน README known-limitation 1 บรรทัด |
-| 4-finger double-fire | OPEN DECISION ด้านบน — ต้อง resolve ก่อน implement |
+| 4-finger double-fire | RESOLVED → option (d) auto-toggle native (ปิดตอน activate, restore ตอน quit) |
+| **native live-apply fail** (setting ต้อง logout ถึงมีผล) | Verification gate #1 — Oasis ทดสอบก่อน; ถ้า fail → fall back (a) surface ให้ผู้ใช้ปิดเอง |
+| **native ปิดค้างหลัง crash** | Verification gate #2 — restore-on-next-launch (marker file) + signal handler |
 | camera + trackpad ยิงซ้อน | action-level cooldown ร่วม (ไม่ใช่ per-source) |
 | Apple ถอด/เปลี่ยน private framework | รับเป็น known risk ของ portfolio; fallback = ปิด trackpad mode, camera ยังทำงาน |
 
 ## Success Criteria
 
-- ปัด 4 นิ้ว (ตาม decision) + 5 นิ้วขึ้นบน trackpad → สลับ desktop / เปิด Mission Control ได้เสถียร
+- ปัด 4 นิ้ว + 5 นิ้วขึ้นบน trackpad → สลับ desktop / เปิด Mission Control ได้เสถียร (4-finger ไม่ยิงซ้อน native)
+- **activate VisionSnap → native 4-finger swipe หยุดตอบสนองทันที (live, ไม่ต้อง logout)** — ถ้าทำไม่ได้ = gate #1 fail, fall back (a)
+- **quit VisionSnap → native 4-finger swipe กลับมาทำงานเป็นค่าเดิมที่ผู้ใช้ตั้งไว้** (ไม่ hardcode on)
+- **kill -9 VisionSnap แล้ว launch ใหม่ → native ถูก restore ให้ตอน launch** (crash-safe, ไม่ปิดค้าง)
 - เปิดทั้ง camera + trackpad พร้อมกัน → ท่า workspace เดียว trigger ครั้งเดียว ไม่ซ้อน
 - ปิด trackpad mode → ไม่กระทบ camera path เดิม
 - ไม่ต้องขอ permission เพิ่มนอกจาก Accessibility ที่มีอยู่
